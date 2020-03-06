@@ -27,7 +27,7 @@ func TestDate_Jieqi(t *testing.T) {
 	})*/
 
 	fmt.Println("=======================================================================================================")
-
+	fmt.Println("2020年从立春开始的节气时间：")
 	jq := d.Jieqi()
 	for k,v := range(jq){
 		fmt.Printf("%d:[%s] %d-%d-%d %d:%d:%d\n",k,v.Name,v.Date.Year,v.Date.Month,v.Date.Day,v.Date.Hour,v.Date.Min,v.Date.Sec)
