@@ -207,7 +207,6 @@ func CtimeNewDate(c Ctime) *Date {
 		Week:         c.Weekday(),
 		Loc:          c.Location(),
 		TianGanDiZhi: &TianGanDiZhi{},
-		JQ:           &JQ{},
 	}
 
 	return &nd
@@ -227,7 +226,6 @@ func (d *Date) Copy() *Date {
 		Week:         nd.Week,
 		Loc:          nd.Loc,
 		TianGanDiZhi: nd.TianGanDiZhi,
-		JQ:           nd.JQ,
 	}
 }
 

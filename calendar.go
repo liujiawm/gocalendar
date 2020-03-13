@@ -17,6 +17,7 @@ type Calendars struct {
 type Calendar struct {
 	Date      *Date
 	LunarDate *LunarDate
+	JQ        *JQ
 }
 
 // 用年和月取一个月日历
@@ -85,13 +86,15 @@ func GetMonthCalendar(y,m int)*Calendars{
 			nld := nd.Solar2Lunar()
 			// 节气
 			jqindex := fmt.Sprintf("%d-%d-%d",nd.Year,nd.Month,nd.Day)
+			var cjq *JQ
 			if jqv,ok := jq[jqindex];ok{
-				nd.JQ = jqv
+				cjq = jqv
 			}
 
 			items[i] = Calendar{
 				Date:nd,
 				LunarDate:nld,
+				JQ:cjq,
 			}
 		}
 	}
@@ -101,13 +104,15 @@ func GetMonthCalendar(y,m int)*Calendars{
 		nld := nd.Solar2Lunar()
 		// 节气
 		jqindex := fmt.Sprintf("%d-%d-%d",nd.Year,nd.Month,nd.Day)
+		var cjq *JQ
 		if jqv,ok := jq[jqindex];ok{
-			nd.JQ = jqv
+			cjq = jqv
 		}
 
 		items[i+prevFree] = Calendar{
 			Date:nd,
 			LunarDate:nld,
+			JQ:cjq,
 		}
 	}
 	if nextFree > 0 {
@@ -119,13 +124,15 @@ func GetMonthCalendar(y,m int)*Calendars{
 			nld := nd.Solar2Lunar()
 			// 节气
 			jqindex := fmt.Sprintf("%d-%d-%d",nd.Year,nd.Month,nd.Day)
+			var cjq *JQ
 			if jqv,ok := jq[jqindex];ok{
-				nd.JQ = jqv
+				cjq = jqv
 			}
 
 			items[i+f] = Calendar{
 				Date:nd,
 				LunarDate:nld,
+				JQ:cjq,
 			}
 		}
 	}
