@@ -1,3 +1,5 @@
+// 年数在1000-3000
+
 package gocalendar
 
 import (
@@ -9,7 +11,6 @@ var d = CtimeNewDate(c)
 
 // 24节气(从立春开始)
 func TestDate_Jieqi(t *testing.T) {
-
 	t.Log(NewCtime().Year(),"年从立春开始的节气时间：")
 	jq := d.Jieqi()
 	for k,v := range(jq){
@@ -29,12 +30,12 @@ func TestDate_GanZhi(t *testing.T) {
 		Loc:NewCtime().Location(),
 	})*/
 	Zwz = true
-	dc,_ := d.GanZhi()
-	t.Logf("%s%s年 %s%s月 %s%s日 %s%s时\n",
-		TianGanArray[dc.TianGanDiZhi.Ytg], DiZhiArray[dc.TianGanDiZhi.Ydz],
-		TianGanArray[dc.TianGanDiZhi.Mtg],DiZhiArray[dc.TianGanDiZhi.Mdz],
-		TianGanArray[dc.TianGanDiZhi.Dtg],DiZhiArray[dc.TianGanDiZhi.Ddz],
-		TianGanArray[dc.TianGanDiZhi.Htg],DiZhiArray[dc.TianGanDiZhi.Hdz])
+	d.GanZhi()
+	t.Logf("公历 %d年%d月%d日%d时 转成以立春开始的干支是: %s%s年 %s%s月 %s%s日 %s%s时\n",d.Year,d.Month,d.Day,d.Hour,
+		TianGanArray[d.TianGanDiZhi.Ytg], DiZhiArray[d.TianGanDiZhi.Ydz],
+		TianGanArray[d.TianGanDiZhi.Mtg],DiZhiArray[d.TianGanDiZhi.Mdz],
+		TianGanArray[d.TianGanDiZhi.Dtg],DiZhiArray[d.TianGanDiZhi.Ddz],
+		TianGanArray[d.TianGanDiZhi.Htg],DiZhiArray[d.TianGanDiZhi.Hdz])
 	// t.Logf("%#v\n",dc.TianGanDiZhi)
 }
 
@@ -42,8 +43,8 @@ func TestDate_GanZhi(t *testing.T) {
 func TestDate_Solar2Lunar(t *testing.T) {
 	d := NewDate(&Date{
 		Year:2020,
-		Month:6,
-		Day:15,
+		Month:1,
+		Day:25,
 		Hour:5,
 		Min:35,
 		Sec:42,
@@ -54,7 +55,7 @@ func TestDate_Solar2Lunar(t *testing.T) {
 	if l.LeapMonth == 1 {
 		leapMonthStr = "(闰)"
 	}
-	t.Logf("公历%d年%d月%d日转成农历是:%d年%s%s月%s日",d.Year,d.Month,d.Day,l.Year,leapMonthStr,MonthChinese(l.Month),DayChinese(l.Day))
+	t.Logf("公历%d年%d月%d日转成农历是:%d(%s%s)[%s]年%s%s月%s日",d.Year,d.Month,d.Day,l.Year,l.YearGanZi.Gan,l.YearGanZi.Zhi,l.YearGanZi.Animals, leapMonthStr,MonthChinese(l.Month),DayChinese(l.Day))
 
 	sd := l.Lunar2Solar()
 	t.Logf("农历:%d年%s%s月%s日转成公历是:%d年%d月%d日",l.Year,leapMonthStr,MonthChinese(l.Month),DayChinese(l.Day),sd.Year,sd.Month,sd.Day)

@@ -1,9 +1,9 @@
-// golang的时间目前能以计算1000年-9999年
 // 主要算来来源于www.bieyu.com相关文章
+// www.bieyu.com要求最大年限3000年内
+// 因此要求年数在1000-3000
 package gocalendar
 
 import (
-	"errors"
 	"fmt"
 	"math"
 	"time"
@@ -21,23 +21,29 @@ type Date struct {
 	Nsec         int
 	Week         int
 	Loc          *time.Location
-	TianGanDiZhi *TianGanDiZhi
+	TianGanDiZhi *TianGanDiZhi // 干支，以立春开始，包含年干支，月干支，日干支，时干支
 }
 
 type LunarDate struct {
-	Year         int
-	Month        int
-	Day          int
-	Hour         int
-	Min          int
-	Sec          int
-	Nsec         int
-	Week         int
-	MonthDays    int // 当月有多少天
-	LeapYear     int // 是否闰年，0不是闰年，大于就是闰几月
-	LeapMonth    int // 当前前是否是所闰的那个月，0不是，1本月就是闰月
-	Loc          *time.Location
-	TianGanDiZhi *TianGanDiZhi
+	Year      int
+	Month     int
+	Day       int
+	Hour      int
+	Min       int
+	Sec       int
+	Nsec      int
+	Week      int
+	MonthDays int // 当月有多少天
+	LeapYear  int // 是否闰年，0不是闰年，大于就是闰几月
+	LeapMonth int // 当前前是否是所闰的那个月，0不是，1本月就是闰月
+	Loc       *time.Location
+	YearGanZi *LunarYearGanZi // 农历年干支，通俗记年以春节开始
+}
+
+type LunarYearGanZi struct {
+	Gan     string
+	Zhi     string
+	Animals string
 }
 
 type TianGanDiZhi struct {
@@ -115,49 +121,98 @@ func NewTianGanDiZhi() *TianGanDiZhi {
 
 func NewLunarDate(ld *LunarDate) *LunarDate {
 	c := NewCtime()
-	if ld.Year == 0 {
+	if ld.Year == 0{
 		ld.Year = c.Year()
+	}else if ld.Year < 1000 {
+		ld.Year = 1000
+	}else if ld.Year > 3000 {
+		ld.Year = 3000
 	}
-	if ld.Month == 0 {
+
+	if ld.Month < 1 || ld.Month > 12{
 		ld.Month = c.Month()
 	}
-	if ld.Day == 0 {
-		ld.Day = 1
+
+	if ld.Day < 1 {
+		ld.Day = c.Day()
 	}
+	if ld.Day > 29{
+		ld.Day = ld.LunarDays()
+	}
+
 	if ld.Loc == nil {
 		ld.Loc = c.Location()
 	}
+	if ld.YearGanZi == nil {
+		ld.LunarYearGanZiCommon()
+	}
 
 	return &LunarDate{
-		Year:         ld.Year,
-		Month:        ld.Month,
-		Day:          ld.Day,
-		Hour:         ld.Hour,
-		Min:          ld.Min,
-		Sec:          ld.Sec,
-		Nsec:         ld.Nsec,
-		Week:         ld.Week,
-		LeapYear:     ld.LeapYear,
-		LeapMonth:    ld.LeapMonth,
-		Loc:          ld.Loc,
-		TianGanDiZhi: &TianGanDiZhi{},
+		Year:      ld.Year,
+		Month:     ld.Month,
+		Day:       ld.Day,
+		Hour:      ld.Hour,
+		Min:       ld.Min,
+		Sec:       ld.Sec,
+		Nsec:      ld.Nsec,
+		Week:      ld.Week,
+		LeapYear:  ld.LeapYear,
+		LeapMonth: ld.LeapMonth,
+		Loc:       ld.Loc,
+		YearGanZi: ld.YearGanZi,
 	}
 }
 
 func NewDate(d *Date) *Date {
 	c := NewCtime()
-	if d.Year == 0 {
+	if d.Year == 0{
 		d.Year = c.Year()
+	}else if d.Year < 1000 {
+		d.Year = 1000
+	}else if d.Year > 3000 {
+		d.Year = 3000
 	}
+
 	if d.Month == 0 {
 		d.Month = c.Month()
 	}
+
 	if d.Day == 0 {
 		d.Day = c.Day()
 	}
+
 	if d.Loc == nil {
 		d.Loc = c.Location()
 	}
+	return CtimeNewDate(DateNewCtime(d))
+}
+
+func CtimeNewDate(c Ctime) *Date {
+	y, m, d := c.Date()
+	h, mi, s := c.Clock()
+
+	if y < 1000 {
+		y = 1000
+	}else if y > 3000 {
+		y = 3000
+	}
+
+	nd := Date{
+		Year:         y,
+		Month:        m,
+		Day:          d,
+		Hour:         h,
+		Min:          mi,
+		Sec:          s,
+		Week:         c.Weekday(),
+		Loc:          c.Location(),
+		TianGanDiZhi: &TianGanDiZhi{},
+	}
+	nd.GanZhi()
+	return &nd
+}
+
+func (d *Date) Copy() *Date {
 	return &Date{
 		Year:         d.Year,
 		Month:        d.Month,
@@ -165,37 +220,13 @@ func NewDate(d *Date) *Date {
 		Hour:         d.Hour,
 		Min:          d.Min,
 		Sec:          d.Sec,
+		Nsec:         d.Nsec,
+		Week:         d.Week,
 		Loc:          d.Loc,
-		TianGanDiZhi: &TianGanDiZhi{},
+		TianGanDiZhi: d.TianGanDiZhi,
 	}
 }
 
-func CtimeNewDate(c Ctime) *Date {
-	y, m, d := c.Date()
-	h, mi, s := c.Clock()
-	return &Date{
-		Year:         y,
-		Month:        m,
-		Day:          d,
-		Hour:         h,
-		Min:          mi,
-		Sec:          s,
-		Loc:          c.Location(),
-		TianGanDiZhi: &TianGanDiZhi{},
-	}
-}
-
-func (d *Date) Copy() *Date {
-	return &Date{
-		Year:  d.Year,
-		Month: d.Month,
-		Day:   d.Day,
-		Hour:  d.Hour,
-		Min:   d.Min,
-		Sec:   d.Sec,
-		Loc:   d.Loc,
-	}
-}
 func (d *Date) PrevYear() *Date {
 	c := DateNewCtime(d.Copy()).AddDate(-1, 0, 0)
 	return CtimeNewDate(c)
@@ -628,13 +659,18 @@ func (d *Date) Jieqi() [24]JQ {
 	return jq
 }
 
-func (d *Date) GanZhi() (*Date, error) {
+
+// 公历对应的干支
+// 以立春时间开始
+func (d *Date) GanZhi(){
+	GZ := NewTianGanDiZhi()
 
 	dc := d.Copy()
 
-	jd := d.Solar2Julian()
+	jd := dc.Solar2Julian()
 	if jd == 0 {
-		return dc, errors.New("取天干地支时Solar2Julian出错")
+		d.TianGanDiZhi = GZ
+		return
 	}
 	jq := pureJQsinceSpring(dc.Year)
 	if jd < jq[1] {
@@ -642,7 +678,6 @@ func (d *Date) GanZhi() (*Date, error) {
 		jq = pureJQsinceSpring(dc.Year)
 	}
 
-	GZ := NewTianGanDiZhi()
 	tg := [4]int{}
 	dz := [4]int{}
 	ygz := ((dc.Year+4712+24)%60 + 60) % 60
@@ -681,9 +716,7 @@ func (d *Date) GanZhi() (*Date, error) {
 	GZ.Htg = hgz % 10
 	GZ.Hdz = hgz % 12
 
-	dc.TianGanDiZhi = GZ
-
-	return dc, nil
+	d.TianGanDiZhi = GZ
 }
 
 // 公历某月有多少天
@@ -717,7 +750,7 @@ func (d *Date) Solar2Julian() float64 {
 	var init float64 = 0
 	var jdy float64
 
-	if (yy > 1582) || (yy == 1582 && mm > 10) || (yy == 1582 && mm == 10 && dd >= 15) { // 这一年有十天是不存在的
+	if (yy > 1582) || (yy == 1582 && mm > 10) || (yy == 1582 && mm == 10 && dd >= 15) {
 		init = 1721119.5
 		jdy = math.Floor(yp*365.25) - math.Floor(yp/100) + math.Floor(yp/400)
 	}
@@ -725,6 +758,8 @@ func (d *Date) Solar2Julian() float64 {
 		init = 1721117.5
 		jdy = math.Floor(yp * 365.25)
 	}
+
+	// 1582年10月5日至1582年10月14日这十天是不存在的
 	if init == 0 {
 		return 0 // 不想加error了,又不知道应该返回什么，先这么着吧
 	}
@@ -955,6 +990,29 @@ func (ld *LunarDate) LunarDays() int {
 	return dy
 }
 
+// 农历年干支通俗记法，以春节开始
+func (ld *LunarDate)LunarYearGanZiCommon(){
+	gk := (ld.Year - 3) % 10
+	zk := (ld.Year - 3) % 12
+
+	if gk == 0 {
+		gk = 9
+	}else {
+		gk -= 1
+	}
+
+	if zk == 0 {
+		zk = 11
+	}else {
+		zk -= 1
+	}
+	ld.YearGanZi = &LunarYearGanZi{
+		Gan:TianGanArray[gk],
+		Zhi:DiZhiArray[zk],
+		Animals:SymbolicAnimalsArray[zk],
+	}
+}
+
 // 将农历时间转换成公历时间
 func (ld *LunarDate) Lunar2Solar() *Date {
 
@@ -1075,12 +1133,7 @@ func (d *Date) Solar2Lunar() *LunarDate {
 
 	ld.Day = int(math.Floor(jd) - math.Floor(jdnm[mi]+0.5) + 1) // 日,此处加1是因为每月初一从1开始而非从0开始
 
-	// 加入天干地支
-	gz, err := d.GanZhi()
-	if err == nil {
-		ld.TianGanDiZhi = gz.TianGanDiZhi
-	}
-
+	ld.LunarYearGanZiCommon()
 	return ld
 }
 
