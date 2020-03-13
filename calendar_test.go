@@ -9,6 +9,15 @@ var c = NewCtime()
 var d = CtimeNewDate(c)
 
 func TestDate_GanZhi(t *testing.T) {
+	d = NewDate(&Date{
+		Year:5020,
+		Month:2,
+		Day:4,
+		Hour:20,
+		Min:35,
+		Sec:42,
+		Loc:NewCtime().Location(),
+	})
 	fmt.Println("=======================================================================================================")
 	Zwz = true
 	dc,_ := d.GanZhi()
@@ -16,7 +25,7 @@ func TestDate_GanZhi(t *testing.T) {
 }
 func TestDate_Jieqi(t *testing.T) {
 
-	/*d := NewDate(&Date{
+	d := NewDate(&Date{
 		Year:2020,
 		Month:6,
 		Day:15,
@@ -24,7 +33,7 @@ func TestDate_Jieqi(t *testing.T) {
 		Min:35,
 		Sec:42,
 		Loc:NewCtime().Location(),
-	})*/
+	})
 
 	fmt.Println("=======================================================================================================")
 	fmt.Println("2020年从立春开始的节气时间：")
