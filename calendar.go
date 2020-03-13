@@ -83,7 +83,7 @@ var (
 	SymbolicAnimalsArray = [12]string{"鼠", "牛", "虎", "兔", "龙", "蛇", "马", "羊", "猴", "鸡", "狗", "猪"}
 
 	// 十二星座
-	XingZuoArray = [12]string{"水瓶座", "双鱼座", "白羊座", "金牛座", "双子座", "巨蟹座", "狮子座", "处女座", "天秤座", "天蝎座", "射手座", "摩羯座"}
+	XingZuoArray = [12]string{"水瓶", "双鱼", "白羊", "金牛", "双子", "巨蟹", "狮子", "处女", "天秤", "天蝎", "射手", "摩羯"}
 
 	// 星座的起始日期
 	XingZuoStartDayArray = [12]int{20, 19, 21, 20, 21, 22, 23, 23, 23, 24, 22, 22}
@@ -565,7 +565,7 @@ func zQsinceWinterSolstice(year int) [15]float64 {
 }
 
 // 根据公历月日计算星座下标
-func (d *Date) getZodiac() int {
+func (d *Date)getZodiac() int {
 	// 下标从0开始
 	kn := d.Month - 1
 
@@ -574,6 +574,10 @@ func (d *Date) getZodiac() int {
 	}
 
 	return kn
+}
+// 星座
+func (d *Date)XingZuo() string{
+	return XingZuoArray[d.getZodiac()]
 }
 
 // 求出含某公历年立春点开始的24节气
@@ -1078,6 +1082,32 @@ func (d *Date) Solar2Lunar() *LunarDate {
 	}
 
 	return ld
+}
+
+// 农历月份常用名称
+func MonthChinese(m int)string{
+	if m > 0 && m <= 12 {
+		return MonthChineseArray[m-1]
+	}
+	return ""
+}
+
+// 农历日期数字返回汉字表示法
+func DayChinese(d int)string{
+	daystr := ""
+	switch d {
+	case 10:
+		daystr = DayChineseArray[0] + NumberChineseArray[10]
+	case 20:
+		daystr = DayChineseArray[2] + NumberChineseArray[10]
+	case 30:
+		daystr = DayChineseArray[3] + NumberChineseArray[10]
+	default:
+		k := d / 10
+		m := d % 10
+		daystr = DayChineseArray[k] + NumberChineseArray[m]
+	}
+	return daystr
 }
 
 // 计算指定日期世界主要城市月亮与太阳升起落下的大约时间(未作日光节约时间之调整)
