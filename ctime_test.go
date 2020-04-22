@@ -1,6 +1,7 @@
 package gocalendar
 
 import (
+	"strings"
 	"testing"
 	"time"
 )
@@ -25,4 +26,7 @@ func TestCtime_MonthDay(t *testing.T) {
 	t.Log(t1.Format(time.RFC3339))
 	ct := Ctime(t1)
 	t.Log(ct.MonthDay())
+	a := "2020-03-25"
+	as := strings.SplitN(a,"-",4)
+	t.Log(as[0],as[1],as[2])
 }

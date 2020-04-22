@@ -6,6 +6,15 @@ import (
 	"testing"
 )
 
+
+func TestPureJQsinceSpring(t *testing.T){
+	j := pureJQsinceSpring(2020)
+	for _,v := range j {
+		t.Log(v)
+	}
+
+}
+
 var c = NewCtime()
 var d = CtimeNewDate(c)
 
@@ -44,11 +53,11 @@ func TestDate_GanZhi(t *testing.T) {
 func TestDate_Solar2Lunar(t *testing.T) {
 	d := NewDate(&Date{
 		Year:2020,
-		Month:1,
-		Day:25,
-		Hour:5,
-		Min:35,
-		Sec:42,
+		Month:5,
+		Day:28,
+		Hour:0,
+		Min:0,
+		Sec:0,
 		Loc:NewCtime().Location(),
 	})
 	l := d.Solar2Lunar()
