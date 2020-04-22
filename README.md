@@ -6,6 +6,7 @@
 程序比较准确的计算出农历与二十四节气(精确到分),由于golang的时间限制在1000-3000年间,在实际使用中注意限制年份
 
 Author: liujiawm@gmail.com
+
 Version: "1.0.0"
 
 日历按月取时固定为42个日期，按周取时固定为7个日期
@@ -134,6 +135,34 @@ PASS
 
 ```
 
+# JSON
+
+```
+	sc := Calendar{
+		Loc:       time.Local, // 时区,默认time.Local
+		FirstWeek: 0,          // 从周几天始,默认0周日开始, (日历表第列是周几,0周日,依次最大值6)
+		Grid:      GridWeek,  // 取日历方式,默认取一个月, gocalendar.GridDay取一天,gocalendar.GridWeek 取一周,gocalendar.GridMonth取一个月
+		Zwz:       false,      // 是否区分早晚子时(子时从23-01时),true则23:00-24:00算成上一天
+		Getjq:     true,       // 是否取节气
+	}
+	cds := sc.Calendars(2020,4,22)
+	cdjson,err := json.Marshal(cds)
+	if err != nil {
+		t.Error("JSON ERR:", err.Error())
+	}
+	t.Logf(string(cdjson))
+
+```
+
+结果:
+
+```
+
+[{"solar":{"date":{"year":2020,"month":4,"day":19,"hour":22,"min":1,"sec":22,"week":0},"jq":{"name":"谷雨","date":{"year":2020,"month":4,"day":19,"hour":22,"min":45,"sec":11,"week":0}},"gan_zhi":{"ytg":6,"ytg_str":"庚","ydz":0,"ydz_str":"子","mtg":6,"mtg_str":"庚","mdz":4,"mdz_str":"辰","dtg":8,"dtg_str":"壬","ddz":4,"ddz_str":"辰","htg":7,"htg_str":"辛","hdz":11,"hdz_str":"亥"}},"lunar":{"date":{"year":2020,"month":3,"day":27,"hour":22,"min":1,"sec":22,"week":0},"month_str":"三","day_str":"廿七","leap_str":"","leap_year":4,"leap_month":0,"gan_zi":{"gan":"庚","zhi":"子","animal":"鼠"}}},{"solar":{"date":{"year":2020,"month":4,"day":20,"hour":22,"min":1,"sec":22,"week":1},"jq":null,"gan_zhi":{"ytg":6,"ytg_str":"庚","ydz":0,"ydz_str":"子","mtg":6,"mtg_str":"庚","mdz":4,"mdz_str":"辰","dtg":9,"dtg_str":"癸","ddz":5,"ddz_str":"巳","htg":9,"htg_str":"癸","hdz":11,"hdz_str":"亥"}},"lunar":{"date":{"year":2020,"month":3,"day":28,"hour":22,"min":1,"sec":22,"week":1},"month_str":"三","day_str":"廿八","leap_str":"","leap_year":4,"leap_month":0,"gan_zi":{"gan":"庚","zhi":"子","animal":"鼠"}}},{"solar":{"date":{"year":2020,"month":4,"day":21,"hour":22,"min":1,"sec":22,"week":2},"jq":null,"gan_zhi":{"ytg":6,"ytg_str":"庚","ydz":0,"ydz_str":"子","mtg":6,"mtg_str":"庚","mdz":4,"mdz_str":"辰","dtg":0,"dtg_str":"甲","ddz":6,"ddz_str":"午","htg":1,"htg_str":"乙","hdz":11,"hdz_str":"亥"}},"lunar":{"date":{"year":2020,"month":3,"day":29,"hour":22,"min":1,"sec":22,"week":2},"month_str":"三","day_str":"廿九","leap_str":"","leap_year":4,"leap_month":0,"gan_zi":{"gan":"庚","zhi":"子","animal":"鼠"}}},{"solar":{"date":{"year":2020,"month":4,"day":22,"hour":22,"min":1,"sec":22,"week":3},"jq":null,"gan_zhi":{"ytg":6,"ytg_str":"庚","ydz":0,"ydz_str":"子","mtg":6,"mtg_str":"庚","mdz":4,"mdz_str":"辰","dtg":1,"dtg_str":"乙","ddz":7,"ddz_str":"未","htg":3,"htg_str":"丁","hdz":11,"hdz_str":"亥"}},"lunar":{"date":{"year":2020,"month":3,"day":30,"hour":22,"min":1,"sec":22,"week":3},"month_str":"三","day_str":"卅十","leap_str":"","leap_year":4,"leap_month":0,"gan_zi":{"gan":"庚","zhi":"子","animal":"鼠"}}},{"solar":{"date":{"year":2020,"month":4,"day":23,"hour":22,"min":1,"sec":22,"week":4},"jq":null,"gan_zhi":{"ytg":6,"ytg_str":"庚","ydz":0,"ydz_str":"子","mtg":6,"mtg_str":"庚","mdz":4,"mdz_str":"辰","dtg":2,"dtg_str":"丙","ddz":8,"ddz_str":"申","htg":5,"htg_str":"己","hdz":11,"hdz_str":"亥"}},"lunar":{"date":{"year":2020,"month":4,"day":1,"hour":22,"min":1,"sec":22,"week":4},"month_str":"四","day_str":"初一","leap_str":"","leap_year":4,"leap_month":0,"gan_zi":{"gan":"庚","zhi":"子","animal":"鼠"}}},{"solar":{"date":{"year":2020,"month":4,"day":24,"hour":22,"min":1,"sec":22,"week":5},"jq":null,"gan_zhi":{"ytg":6,"ytg_str":"庚","ydz":0,"ydz_str":"子","mtg":6,"mtg_str":"庚","mdz":4,"mdz_str":"辰","dtg":3,"dtg_str":"丁","ddz":9,"ddz_str":"酉","htg":7,"htg_str":"辛","hdz":11,"hdz_str":"亥"}},"lunar":{"date":{"year":2020,"month":4,"day":2,"hour":22,"min":1,"sec":22,"week":5},"month_str":"四","day_str":"初二","leap_str":"","leap_year":4,"leap_month":0,"gan_zi":{"gan":"庚","zhi":"子","animal":"鼠"}}},{"solar":{"date":{"year":2020,"month":4,"day":25,"hour":22,"min":1,"sec":22,"week":6},"jq":null,"gan_zhi":{"ytg":6,"ytg_str":"庚","ydz":0,"ydz_str":"子","mtg":6,"mtg_str":"庚","mdz":4,"mdz_str":"辰","dtg":4,"dtg_str":"戊","ddz":10,"ddz_str":"戌","htg":9,"htg_str":"癸","hdz":11,"hdz_str":"亥"}},"lunar":{"date":{"year":2020,"month":4,"day":3,"hour":22,"min":1,"sec":22,"week":6},"month_str":"四","day_str":"初三","leap_str":"","leap_year":4,"leap_month":0,"gan_zi":{"gan":"庚","zhi":"子","animal":"鼠"}}}]
+
+```
+
+
 # 取节气
 
 ```
@@ -223,32 +252,6 @@ func TestCalendar_Solar2Lunar(t *testing.T) {
     calendar_test.go:99: 农历2020年4月6日转成公历是: 2020年5月28日
 PASS
 
-```
-
-# JSON
-
-```
-	sc := Calendar{
-		Loc:       time.Local, // 时区,默认time.Local
-		FirstWeek: 0,          // 从周几天始,默认0周日开始, (日历表第列是周几,0周日,依次最大值6)
-		Grid:      GridWeek,  // 取日历方式,默认取一个月, gocalendar.GridDay取一天,gocalendar.GridWeek 取一周,gocalendar.GridMonth取一个月
-		Zwz:       false,      // 是否区分早晚子时(子时从23-01时),true则23:00-24:00算成上一天
-		Getjq:     true,       // 是否取节气
-	}
-	cds := sc.Calendars(2020,4,22)
-	cdjson,err := json.Marshal(cds)
-	if err != nil {
-		t.Error("JSON ERR:", err.Error())
-	}
-	t.Logf(string(cdjson))
-
-```
-
-结果:
-
-```
-
-[{"solar":{"date":{"year":2020,"month":4,"day":19,"hour":22,"min":1,"sec":22,"week":0},"jq":{"name":"谷雨","date":{"year":2020,"month":4,"day":19,"hour":22,"min":45,"sec":11,"week":0}},"gan_zhi":{"ytg":6,"ytg_str":"庚","ydz":0,"ydz_str":"子","mtg":6,"mtg_str":"庚","mdz":4,"mdz_str":"辰","dtg":8,"dtg_str":"壬","ddz":4,"ddz_str":"辰","htg":7,"htg_str":"辛","hdz":11,"hdz_str":"亥"}},"lunar":{"date":{"year":2020,"month":3,"day":27,"hour":22,"min":1,"sec":22,"week":0},"month_str":"三","day_str":"廿七","leap_str":"","leap_year":4,"leap_month":0,"gan_zi":{"gan":"庚","zhi":"子","animal":"鼠"}}},{"solar":{"date":{"year":2020,"month":4,"day":20,"hour":22,"min":1,"sec":22,"week":1},"jq":null,"gan_zhi":{"ytg":6,"ytg_str":"庚","ydz":0,"ydz_str":"子","mtg":6,"mtg_str":"庚","mdz":4,"mdz_str":"辰","dtg":9,"dtg_str":"癸","ddz":5,"ddz_str":"巳","htg":9,"htg_str":"癸","hdz":11,"hdz_str":"亥"}},"lunar":{"date":{"year":2020,"month":3,"day":28,"hour":22,"min":1,"sec":22,"week":1},"month_str":"三","day_str":"廿八","leap_str":"","leap_year":4,"leap_month":0,"gan_zi":{"gan":"庚","zhi":"子","animal":"鼠"}}},{"solar":{"date":{"year":2020,"month":4,"day":21,"hour":22,"min":1,"sec":22,"week":2},"jq":null,"gan_zhi":{"ytg":6,"ytg_str":"庚","ydz":0,"ydz_str":"子","mtg":6,"mtg_str":"庚","mdz":4,"mdz_str":"辰","dtg":0,"dtg_str":"甲","ddz":6,"ddz_str":"午","htg":1,"htg_str":"乙","hdz":11,"hdz_str":"亥"}},"lunar":{"date":{"year":2020,"month":3,"day":29,"hour":22,"min":1,"sec":22,"week":2},"month_str":"三","day_str":"廿九","leap_str":"","leap_year":4,"leap_month":0,"gan_zi":{"gan":"庚","zhi":"子","animal":"鼠"}}},{"solar":{"date":{"year":2020,"month":4,"day":22,"hour":22,"min":1,"sec":22,"week":3},"jq":null,"gan_zhi":{"ytg":6,"ytg_str":"庚","ydz":0,"ydz_str":"子","mtg":6,"mtg_str":"庚","mdz":4,"mdz_str":"辰","dtg":1,"dtg_str":"乙","ddz":7,"ddz_str":"未","htg":3,"htg_str":"丁","hdz":11,"hdz_str":"亥"}},"lunar":{"date":{"year":2020,"month":3,"day":30,"hour":22,"min":1,"sec":22,"week":3},"month_str":"三","day_str":"卅十","leap_str":"","leap_year":4,"leap_month":0,"gan_zi":{"gan":"庚","zhi":"子","animal":"鼠"}}},{"solar":{"date":{"year":2020,"month":4,"day":23,"hour":22,"min":1,"sec":22,"week":4},"jq":null,"gan_zhi":{"ytg":6,"ytg_str":"庚","ydz":0,"ydz_str":"子","mtg":6,"mtg_str":"庚","mdz":4,"mdz_str":"辰","dtg":2,"dtg_str":"丙","ddz":8,"ddz_str":"申","htg":5,"htg_str":"己","hdz":11,"hdz_str":"亥"}},"lunar":{"date":{"year":2020,"month":4,"day":1,"hour":22,"min":1,"sec":22,"week":4},"month_str":"四","day_str":"初一","leap_str":"","leap_year":4,"leap_month":0,"gan_zi":{"gan":"庚","zhi":"子","animal":"鼠"}}},{"solar":{"date":{"year":2020,"month":4,"day":24,"hour":22,"min":1,"sec":22,"week":5},"jq":null,"gan_zhi":{"ytg":6,"ytg_str":"庚","ydz":0,"ydz_str":"子","mtg":6,"mtg_str":"庚","mdz":4,"mdz_str":"辰","dtg":3,"dtg_str":"丁","ddz":9,"ddz_str":"酉","htg":7,"htg_str":"辛","hdz":11,"hdz_str":"亥"}},"lunar":{"date":{"year":2020,"month":4,"day":2,"hour":22,"min":1,"sec":22,"week":5},"month_str":"四","day_str":"初二","leap_str":"","leap_year":4,"leap_month":0,"gan_zi":{"gan":"庚","zhi":"子","animal":"鼠"}}},{"solar":{"date":{"year":2020,"month":4,"day":25,"hour":22,"min":1,"sec":22,"week":6},"jq":null,"gan_zhi":{"ytg":6,"ytg_str":"庚","ydz":0,"ydz_str":"子","mtg":6,"mtg_str":"庚","mdz":4,"mdz_str":"辰","dtg":4,"dtg_str":"戊","ddz":10,"ddz_str":"戌","htg":9,"htg_str":"癸","hdz":11,"hdz_str":"亥"}},"lunar":{"date":{"year":2020,"month":4,"day":3,"hour":22,"min":1,"sec":22,"week":6},"month_str":"四","day_str":"初三","leap_str":"","leap_year":4,"leap_month":0,"gan_zi":{"gan":"庚","zhi":"子","animal":"鼠"}}}]
 ```
 
 # 星座
