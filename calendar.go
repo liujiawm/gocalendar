@@ -15,7 +15,7 @@ import (
 )
 
 const Author  = "liujiawm@gmail.com"
-const Version  = "1.0.0"
+const Version  = "1.0.1"
 
 // 取日历方式
 const (
