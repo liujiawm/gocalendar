@@ -109,9 +109,6 @@ var (
 	// 地支
 	DiZhiArray = [12]string{"子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"}
 
-	// 五行
-	WuXingArray = [5]string{"金", "木", "水", "火", "土"}
-
 	// 生肖
 	SymbolicAnimalsArray = [12]string{"鼠", "牛", "虎", "兔", "龙", "蛇", "马", "羊", "猴", "鸡", "狗", "猪"}
 
@@ -274,7 +271,7 @@ func (sc *Calendar)DateToSolarDate(d *Date)*SolarDate{
 	return sd
 }
 
-// 将公历时间转换为儒略日历时间
+// Solar2Julian 将公历时间转换为儒略日历时间
 func (sc *Calendar) Solar2Julian(sd *Date) (float64,error) {
 
 	if sc.Loc == nil {
@@ -316,7 +313,7 @@ func (sc *Calendar) Solar2Julian(sd *Date) (float64,error) {
 	return Round(jdy+jdm+float64(jdd)+float64(jdh)+init, 7),nil
 }
 
-// 将儒略日历时间转换为公历(格里高利历)时间
+// Julian2Solar 将儒略日历时间转换为公历(格里高利历)时间
 func (sc *Calendar)Julian2Solar(jd float64) *Date {
 	if sc.Loc == nil {
 		sc.Loc = time.Local
@@ -366,7 +363,7 @@ func (sc *Calendar)Julian2Solar(jd float64) *Date {
 	return TimeToDate(t)
 }
 
-// 将公历日期转换成农历日期
+// Solar2Lunar 将公历日期转换成农历日期
 func (sc *Calendar) Solar2Lunar(sd *SolarDate) (*LunarDate,error) {
 
 	if sc.Loc == nil {
@@ -440,7 +437,7 @@ func (sc *Calendar) Solar2Lunar(sd *SolarDate) (*LunarDate,error) {
 	return ld,err
 }
 
-// 将农历日期转换成公历日期
+// Lunar2Solar 将农历日期转换成公历日期
 func (sc *Calendar) Lunar2Solar(ly, lm, ld, isLeap int) (*SolarDate, error) {
 	if sc.Loc == nil {
 		sc.Loc = time.Local
@@ -546,8 +543,9 @@ func (sc *Calendar) Lunar2Solar(ly, lm, ld, isLeap int) (*SolarDate, error) {
 	return sd,nil
 }
 
-// 求出含某公历年立春点开始的24节气
+// Jieqi 求出含某公历年立春点开始的24节气
 // 这里为了日历好显示，取27个节气，从上一年的冬至开始
+// 返回[]*SolarJQ是一个有序切片,map[string]*SolarJQ是一个以"年-月-日"为索引的map
 func (sc *Calendar)Jieqi(year int) ([]*SolarJQ, map[string]*SolarJQ, error) {
 
 	if sc.Loc == nil {
@@ -619,8 +617,7 @@ func (sc *Calendar)Jieqi(year int) ([]*SolarJQ, map[string]*SolarJQ, error) {
 	return jq,jqmap,nil
 }
 
-// 公历对应的干支
-// 以立春时间开始
+// tianGanDiZhi 公历对应的干支 以立春时间开始
 func (sc *Calendar) tianGanDiZhi(sd *SolarDate){
 	sdgz := new(SolarTianGanDiZhi)
 
@@ -693,7 +690,7 @@ func (sc *Calendar) tianGanDiZhi(sd *SolarDate){
 
 
 
-// 求算以含冬至中气为阴历11月开始的连续16个朔望月
+// smSinceWinterSolstice 求算以含冬至中气为阴历11月开始的连续16个朔望月
 func (sc *Calendar)smSinceWinterSolstice(year int, jdws float64) ([16]float64,error) {
 
 	tjd := [20]float64{}
@@ -715,10 +712,10 @@ func (sc *Calendar)smSinceWinterSolstice(year int, jdws float64) ([16]float64,er
 
 		// mjd := thejd + synMonth * float64(i)
 
-		// 以k值代入求瞬時朔望日,因中國比格林威治先行8小時,加1/3天
+		// 以k值代入求瞬时朔望日,因中国比格林威治先行8小时,加1/3天
 		tjd[i] = trueNewMoon(k) + float64(1)/3
 
-		// 下式为修正dynamical time to Universal time
+		// 下式为修正 dynamical time to Universal time
 		month := i - 1
 		tjd[i] = Round(tjd[i]-deltaT(year, month)/1440, 7) // 1为1月,0为前一年12月,-1为前一年11月(当i=0时,i-1=-1,代表前一年11月)
 	}
@@ -742,7 +739,7 @@ func (sc *Calendar)smSinceWinterSolstice(year int, jdws float64) ([16]float64,er
 
 }
 
-// 以比较日期法求算冬月及其余各月名称代码,包含闰月,冬月为0,腊月为1,正月为2,其余类推.闰月多加0.5
+// zqAndSMandLunarMonthCode 以比较日期法求算冬月及其余各月名称代码,包含闰月,冬月为0,腊月为1,正月为2,其余类推.闰月多加0.5
 func (sc *Calendar)zqAndSMandLunarMonthCode(year int) ([15]float64, [16]float64, [15]float64, error) {
 
 	mc := [15]float64{}
@@ -796,7 +793,7 @@ func (sc *Calendar)zqAndSMandLunarMonthCode(year int) ([15]float64, [16]float64,
 	return jdzq, jdnm, mc, nil
 }
 
-// 获取农历某年的闰月,0为无闰月
+// leap 获取农历某年的闰月,0为无闰月
 func (sc *Calendar)leap(ly int) int {
 	_, _, mc, err := sc.zqAndSMandLunarMonthCode(ly)
 	if err != nil {
@@ -814,7 +811,7 @@ func (sc *Calendar)leap(ly int) int {
 	return int(math.Max(0, leap-2))
 }
 
-// 获取农历某个月有多少天
+// lunarDays 获取农历某个月有多少天
 func (sc *Calendar) lunarDays(ly, lm, isLeap int) (int, error) {
 
 	_, jdnm, mc, err := sc.zqAndSMandLunarMonthCode(ly)
@@ -851,7 +848,7 @@ func (sc *Calendar) lunarDays(ly, lm, isLeap int) (int, error) {
 		} else { // 若指定的月份即为闰月
 			dy = nofd[lm]
 		}
-	} else { // 若沒有指明是闰月
+	} else { // 若没有指明是闰月
 		if leap == 0 { // 若旗标非闰月,则表示此年不含闰月(包括前一年的11月起之月份)
 			dy = nofd[lm - 1]
 		} else { // 若旗标为本年有闰月(包括前一年的11月起之月份) 公式nofd(mx - (mx > leap) - 1)的用意为:若指定月大于闰月,则索引用mx,否则索引用mx-1
@@ -922,7 +919,7 @@ func DayChinese(d int)string{
 	return daystr
 }
 
-// 地球在绕日运行时会因受到其他星球之影响而产生摄动(perturbation)
+// perturbation 地球在绕日运行时会因受到其他星球之影响而产生摄动(perturbation)
 // 返回某时刻(儒略日历)的摄动偏移量
 func perturbation(jd float64) float64 {
 	t := (jd - 2451545) / 36525
@@ -935,7 +932,7 @@ func perturbation(jd float64) float64 {
 	return Round(0.00001*s/l, 16)
 }
 
-// 求出实际新月点
+// trueNewMoon 求出实际新月点
 // 以2000年初的第一个均值新月点为0点求出的均值新月点和其朔望月之序數 k 代入此副程式來求算实际新月点
 func trueNewMoon(k float64) float64 {
 
@@ -1011,7 +1008,7 @@ func trueNewMoon(k float64) float64 {
 	return pt + apt1 + apt2
 }
 
-// 对于指定日期时刻所属的朔望月,求出其均值新月点的月序数
+// meanNewMoon 对于指定日期时刻所属的朔望月,求出其均值新月点的月序数
 func meanNewMoon(jd float64) (float64, float64) {
 
 	// kn为从2000年1月6日14时20分36秒起至指定年月日之农历月数,以synodic month为单位
@@ -1027,7 +1024,7 @@ func meanNewMoon(jd float64) (float64, float64) {
 	return kn, thejd
 }
 
-// 计算指定年(公历)的春分点(mean vernal equinox)
+// ve 计算指定年(公历)的春分点(mean vernal equinox)
 // 比利时的气象学家Jean Meeus在1991年出版的”Astronomical Algorithms”一书中提供了一些求均值春分点(mean vernal equinox)的公式
 // 但因地球在绕日运行时会因受到其他星球之影响而产生摄动(perturbation),必须将此现象产生的偏移量加入
 // 返回儒略日历格林威治时间
@@ -1055,16 +1052,13 @@ func ve(year int) (float64, error) {
 	return 0,errors.New("年份超出限制")
 }
 
-// 求∆t
+// deltaT 求∆t
 func deltaT(year, month int) float64 {
 
 	y := float64(year) + (float64(month)-0.5) / 12
 
 	var dt float64
 
-	// 利用golang中switch的特点,将原来的is...else...改为了switch,没别的原因,只因"强迫症"看着原来的if...else...难受
-	// golang中switch与C等语言的规则不同,
-	// case不需要break来明确退出case,只有在case中明确使用fallthrough关键字才会继续执行紧跟的下一个case
 	switch {
 	case y <= -500:
 		t := (y - 1820) / 100
@@ -1113,126 +1107,13 @@ func deltaT(year, month int) float64 {
 		dt = -20 + 32 * math.Pow(t,2)
 	}
 
-	// if y <= -500 {
-	// 	u := (y - 1820) / 100
-	// 	u2 := math.Pow(u,2)
-	// 	dt = -20 + 32*u2
-	// } else {
-	// 	if y < 500 {
-	// 		u := y / 100
-	// 		u2 := math.Pow(u,2)
-	// 		u3 := math.Pow(u,3)
-	// 		u4 := math.Pow(u,4)
-	// 		u5 := math.Pow(u,5)
-	// 		u6 := math.Pow(u,6)
-	// 		dt = 10583.6 - 1014.41*u + 33.78311*u2 - 5.952053*u3 - 0.1798452*u4 + 0.022174192*u5 + 0.0090316521*u6
-	// 	} else {
-	// 		if y < 1600 {
-	// 			u := (y - 1000) / 100
-	// 			u2 := math.Pow(u,2)
-	// 			u3 := math.Pow(u,3)
-	// 			u4 := math.Pow(u,4)
-	// 			u5 := math.Pow(u,5)
-	// 			u6 := math.Pow(u,6)
-	// 			dt = 1574.2 - 556.01*u + 71.23472*u2 + 0.319781*u3 - 0.8503463*u4 - 0.005050998*u5 + 0.0083572073*u6
-	// 		} else {
-	// 			if y < 1700 {
-	// 				t := y - 1600
-	// 				t2 := math.Pow(t,2)
-	// 				t3 := math.Pow(t,3)
-	// 				dt = 120 - 0.9808*t - 0.01532*t2 + t3/7129
-	// 			} else {
-	// 				if y < 1800 {
-	// 					t := y - 1700
-	// 					t2 := math.Pow(t,2)
-	// 					t3 := math.Pow(t,3)
-	// 					t4 := math.Pow(t,4)
-	// 					dt = 8.83 + 0.1603*t - 0.0059285*t2 + 0.00013336*t3 - t4/1174000
-	// 				} else {
-	// 					if y < 1860 {
-	// 						t := y - 1800
-	// 						t2 := math.Pow(t,2)
-	// 						t3 := math.Pow(t,3)
-	// 						t4 := math.Pow(t,4)
-	// 						t5 := math.Pow(t,5)
-	// 						t6 := math.Pow(t,6)
-	// 						t7 := math.Pow(t,7)
-	// 						dt = 13.72 - 0.332447*t + 0.0068612*t2 + 0.0041116*t3 - 0.00037436*t4 + 0.0000121272*t5 - 0.0000001699*t6 + 0.000000000875*t7
-	// 					} else {
-	// 						if y < 1900 {
-	// 							t := y - 1860
-	// 							t2 := math.Pow(t,2)
-	// 							t3 := math.Pow(t,3)
-	// 							t4 := math.Pow(t,4)
-	// 							t5 := math.Pow(t,5)
-	// 							dt = 7.62 + 0.5737*t - 0.251754*t2 + 0.01680668*t3 - 0.0004473624*t4 + t5/233174
-	// 						} else {
-	// 							if y < 1920 {
-	// 								t := y - 1900
-	// 								t2 := math.Pow(t,2)
-	// 								t3 := math.Pow(t,3)
-	// 								t4 := math.Pow(t,4)
-	// 								dt = -2.79 + 1.494119*t - 0.0598939*t2 + 0.0061966*t3 - 0.000197*t4
-	// 							} else {
-	// 								if y < 1941 {
-	// 									t := y - 1920
-	// 									t2 := math.Pow(t,2)
-	// 									t3 := math.Pow(t,3)
-	// 									dt = 21.2 + 0.84493*t - 0.0761*t2 + 0.0020936*t3
-	// 								} else {
-	// 									if y < 1961 {
-	// 										t := y - 1950
-	// 										t2 := math.Pow(t,2)
-	// 										t3 := math.Pow(t,3)
-	// 										dt = 29.07 + 0.407*t - t2/233 + t3/2547
-	// 									} else {
-	// 										if y < 1986 {
-	// 											t := y - 1975
-	// 											t2 := math.Pow(t,2)
-	// 											t3 := math.Pow(t,3)
-	// 											dt = 45.45 + 1.067*t - t2/260 - t3/718
-	// 										} else {
-	// 											if y < 2005 {
-	// 												t := y - 2000
-	// 												t2 := math.Pow(t,2)
-	// 												t3 := math.Pow(t,3)
-	// 												t4 := math.Pow(t,4)
-	// 												t5 := math.Pow(t,5)
-	// 												dt = 63.86 + 0.3345*t - 0.060374*t2 + 0.0017275*t3 + 0.000651814*t4 + 0.00002373599*t5
-	// 											} else {
-	// 												if y < 2050 {
-	// 													t := y - 2000
-	// 													t2 := math.Pow(t,2)
-	// 													dt = 62.92 + 0.32217*t + 0.005589*t2
-	// 												} else {
-	// 													if y < 2150 {
-	// 														u := (y - 1820) / 100
-	// 														dt = -20 + 32*u*u - 0.5628*(2150-y)
-	// 													} else {
-	// 														u := (y - 1820) / 100
-	// 														dt = -20 + 32*u*u
-	// 													}
-	// 												}
-	// 											}
-	// 										}
-	// 									}
-	// 								}
-	// 							}
-	// 						}
-	// 					}
-	// 				}
-	// 			}
-	// 		}
-	// 	}
-	// }
-
 	if y < 1955 || y >= 2005 {
 		dt = dt - (0.000012932 * (y - 1955) * (y - 1955))
 	}
 	return Round(dt/60, 13) // 将秒转换为分
 }
 
-// 获取指定年的春分开始的24节气,另外多取2个确保覆盖完一个公历年
+// meanJqJd 获取指定年的春分开始的24节气,另外多取2个确保覆盖完一个公历年
 // 大致原理是:先用此方法得到理论值,再用摄动值(Perturbation)和固定参数deltaT做调整
 func meanJqJd(year int) ([26]float64, error) {
 
@@ -1300,7 +1181,7 @@ func meanJqJd(year int) ([26]float64, error) {
 	return jqjd,nil
 }
 
-// 获取指定年的春分开始作Perturbaton调整后的24节气,可以多取2个
+// adjustedJQ 获取指定年的春分开始作Perturbaton调整后的24节气,可以多取2个
 func adjustedJQ(year, start, end int) ([26]float64, error) {
 
 	jq := [26]float64{}
@@ -1332,7 +1213,7 @@ func adjustedJQ(year, start, end int) ([26]float64, error) {
 	return jq, nil
 }
 
-// 求出以某年立春点开始的节(注意:为了方便计算起运数,此处第0位为上一年的小寒)
+// pureJQsinceSpring 求出以某年立春点开始的节(注意:为了方便计算起运数,此处第0位为上一年的小寒)
 func pureJQsinceSpring(year int) ([16]float64, error) {
 	jdpjq := [16]float64{}
 
@@ -1374,7 +1255,7 @@ func pureJQsinceSpring(year int) ([16]float64, error) {
 	return jdpjq,err
 }
 
-// 求出自冬至点为起点的连续15个中气
+// zqSinceWinterSolstice 求出自冬至点为起点的连续15个中气
 func zqSinceWinterSolstice(year int) ([15]float64, error) {
 	jdpjq := [15]float64{}
 	dj,err := adjustedJQ(year-1, 18, 23)
