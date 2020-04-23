@@ -3,7 +3,7 @@
 中国的农历历法综合了太阳历和月亮历,为中国的生活生产提供了重要的帮助,是中国古人智慧与中国传统文化的一个重要体现
 
 程序比较准确的计算出农历与二十四节气(精确到分),时间限制在1000-3000年间,在实际使用中注意限制年份
- */
+*/
 
 package gocalendar
 
@@ -14,8 +14,8 @@ import (
 	"time"
 )
 
-const Author  = "liujiawm@gmail.com"
-const Version  = "1.0.1"
+const Author = "liujiawm@gmail.com"
+const Version = "1.0.2"
 
 // 取日历方式
 const (
@@ -26,11 +26,11 @@ const (
 
 // 日历
 type Calendar struct {
-	Loc *time.Location // time.Location 默认time.Local
-	FirstWeek int // 日历显示时第一列显示周几，(日历表第一列是周几,0周日,依次最大值6)
-	Grid int // 取日历方式,GridDay按天取日历,GridWeek按周取日历,GridMonth按月取日历
-	Zwz bool // 是否区分早晚子时(子时从23-01时),true则23:00-24:00算成上一天
-	Getjq bool
+	Loc       *time.Location // time.Location 默认time.Local
+	FirstWeek int            // 日历显示时第一列显示周几，(日历表第一列是周几,0周日,依次最大值6)
+	Grid      int            // 取日历方式,GridDay按天取日历,GridWeek按周取日历,GridMonth按月取日历
+	Zwz       bool           // 是否区分早晚子时(子时从23-01时),true则23:00-24:00算成上一天
+	Getjq     bool
 }
 
 type CalendarData struct {
@@ -40,57 +40,55 @@ type CalendarData struct {
 
 // 公历
 type SolarDate struct {
-	*Date `json:"date"`
-	Jq *SolarJQ `json:"jq"`
+	*Date  `json:"date"`
+	Jq     *SolarJQ           `json:"jq"`
 	GanZhi *SolarTianGanDiZhi `json:"gan_zhi"`
 }
 
 // 节气及时间
 type SolarJQ struct {
 	Name string `json:"name"`
-	Date *Date `json:"date"`
+	Date *Date  `json:"date"`
 }
 
 // 公历天干地支
 type SolarTianGanDiZhi struct {
-	Ytg int `json:"ytg"` // 年天干
+	Ytg    int    `json:"ytg"`     // 年天干
 	YtgStr string `json:"ytg_str"` // 年天干名称
-	Ydz int `json:"ydz"` // 年地支
+	Ydz    int    `json:"ydz"`     // 年地支
 	YdzStr string `json:"ydz_str"` // 年地支名称
-	Mtg int `json:"mtg"` // 月天干
+	Mtg    int    `json:"mtg"`     // 月天干
 	MtgStr string `json:"mtg_str"` // 月天干名称
-	Mdz int `json:"mdz"` // 月地支
+	Mdz    int    `json:"mdz"`     // 月地支
 	MdzStr string `json:"mdz_str"` // 月地支名称
-	Dtg int `json:"dtg"` // 日天干
+	Dtg    int    `json:"dtg"`     // 日天干
 	DtgStr string `json:"dtg_str"` // 日天干名称
-	Ddz int `json:"ddz"` // 日地支
+	Ddz    int    `json:"ddz"`     // 日地支
 	DdzStr string `json:"ddz_str"` // 日地支名称
-	Htg int `json:"htg"` // 时天干
+	Htg    int    `json:"htg"`     // 时天干
 	HtgStr string `json:"htg_str"` // 时天干名称
-	Hdz int `json:"hdz"` // 时地支
+	Hdz    int    `json:"hdz"`     // 时地支
 	HdzStr string `json:"hdz_str"` // 时地支名称
 }
 
 // 农历
 type LunarDate struct {
-	*Date `json:"date"`
-	MonthStr string `json:"month_str"` // 月的农历名称
-	DayStr string `json:"day_str"` // 天的农历名称
-	LeapStr string `json:"leap_str"` // 闰
-	MonthDays int `json:"-"` // 当月有多少天
-	LeapYear  int `json:"leap_year"` // 是否闰年，0不是闰年，大于就是闰几月
-	LeapMonth int `json:"leap_month"` // 当前前是否是所闰的那个月，0不是，1本月就是闰月
+	*Date     `json:"date"`
+	MonthStr  string          `json:"month_str"`  // 月的农历名称
+	DayStr    string          `json:"day_str"`    // 天的农历名称
+	LeapStr   string          `json:"leap_str"`   // 闰
+	MonthDays int             `json:"-"`          // 当月有多少天
+	LeapYear  int             `json:"leap_year"`  // 是否闰年，0不是闰年，大于就是闰几月
+	LeapMonth int             `json:"leap_month"` // 当前前是否是所闰的那个月，0不是，1本月就是闰月
 	YearGanZi *LunarYearGanZi `json:"gan_zi"`
 }
 
 // 农历通谷记年(干支和生肖属相)
 type LunarYearGanZi struct {
-	Gan     string `json:"gan"`
-	Zhi     string `json:"zhi"`
-	Animal  string `json:"animal"`
+	Gan    string `json:"gan"`
+	Zhi    string `json:"zhi"`
+	Animal string `json:"animal"`
 }
-
-
 
 var (
 	LeapStr = "闰"
@@ -116,7 +114,6 @@ var (
 	JieQiArray = [24]string{"春分", "清明", "谷雨", "立夏", "小满", "芒种", "夏至", "小暑", "大暑", "立秋", "处暑", "白露",
 		"秋分", "寒露", "霜降", "立冬", "小雪", "大雪", "冬至", "小寒", "大寒", "立春", "雨水", "惊蛰"}
 
-
 	// 均值朔望月长(mean length of synodic month)
 	// 朔望月长每个月都不同，此处仅为均值，在算出新月点后，还需加上一个调整值
 	synMonth float64 = 29.530588853
@@ -136,23 +133,23 @@ var (
 )
 
 // DefaultCalendar 默认日历设置
-func DefaultCalendar()*Calendar{
+func DefaultCalendar() *Calendar {
 	dc := &Calendar{
-		Loc: time.Local,
-		FirstWeek:0,
-		Grid:GridMonth,
-		Zwz:false,
-		Getjq:true,
+		Loc:       time.Local,
+		FirstWeek: 0,
+		Grid:      GridMonth,
+		Zwz:       false,
+		Getjq:     true,
 	}
 	return NewCalendar(dc)
 }
 
 // NewCalendar 日历设置
-func NewCalendar(c *Calendar)*Calendar{
+func NewCalendar(c *Calendar) *Calendar {
 	if c.Loc == nil {
 		c.Loc = time.Local
 	}
-	if c.FirstWeek< 0 || c.FirstWeek > 6 {
+	if c.FirstWeek < 0 || c.FirstWeek > 6 {
 		c.FirstWeek = 0
 	}
 	return &Calendar{
@@ -163,111 +160,119 @@ func NewCalendar(c *Calendar)*Calendar{
 		Getjq:     c.Getjq,
 	}
 }
+
 // NowCalendars 当前时间的日历,包括公历和农历
-func (sc *Calendar)NowCalendars()[]*CalendarData{
+func (sc *Calendar) NowCalendars() []*CalendarData {
+	if sc.Loc == nil {
+		sc.Loc = time.Local
+	}
+	if sc.FirstWeek < 0 || sc.FirstWeek > 6 {
+		sc.FirstWeek = 0
+	}
+
 	nt := timeFun().In(sc.Loc)
 	return sc.calendars(TimeToDate(nt))
 }
 
 // Calendars 日历,包括公历和农历
-func (sc *Calendar)Calendars(y,m,d int)[]*CalendarData{
+func (sc *Calendar) Calendars(y, m, d int) []*CalendarData {
 	if sc.Loc == nil {
 		sc.Loc = time.Local
 	}
-	if sc.FirstWeek< 0 || sc.FirstWeek > 6 {
+	if sc.FirstWeek < 0 || sc.FirstWeek > 6 {
 		sc.FirstWeek = 0
 	}
 
 	var cds []*CalendarData
-	solarDates := sc.SolarCalendar(y,m,d)
-	for _,dv := range solarDates {
+	solarDates := sc.SolarCalendar(y, m, d)
+	for _, dv := range solarDates {
 		cd := new(CalendarData)
 		cd.SD = dv
-		ld,err := sc.Solar2Lunar(dv)
+		ld, err := sc.Solar2Lunar(dv)
 		if err == nil {
 			cd.LD = ld
 		}
-		cds = append(cds,cd)
+		cds = append(cds, cd)
 	}
 
 	return cds
 }
 
 // SolarCalendar 当前时间time.Now() 日历,公历
-func (sc *Calendar)NowSolarCalendar()[]*SolarDate{
+func (sc *Calendar) NowSolarCalendar() []*SolarDate {
 	if sc.Loc == nil {
 		sc.Loc = time.Local
 	}
-	if sc.FirstWeek< 0 || sc.FirstWeek > 6 {
+	if sc.FirstWeek < 0 || sc.FirstWeek > 6 {
 		sc.FirstWeek = 0
 	}
 	sd := TimeToDate(timeFun().In(sc.Loc))
 	return sc.solarCalendar(sd)
 }
+
 // SolarCalendar 日历,公历
-func (sc *Calendar)SolarCalendar(y,m,d int)[]*SolarDate{
+func (sc *Calendar) SolarCalendar(y, m, d int) []*SolarDate {
 	if sc.Loc == nil {
 		sc.Loc = time.Local
 	}
-	if sc.FirstWeek< 0 || sc.FirstWeek > 6 {
+	if sc.FirstWeek < 0 || sc.FirstWeek > 6 {
 		sc.FirstWeek = 0
 	}
 
-	hour,min,sec := timeFun().In(sc.Loc).Clock()
-	sd := TimeToDate(time.Date(y,time.Month(m),d,hour,min,sec,0,sc.Loc))
+	hour, min, sec := timeFun().In(sc.Loc).Clock()
+	sd := TimeToDate(time.Date(y, time.Month(m), d, hour, min, sec, 0, sc.Loc))
 
 	return sc.solarCalendar(sd)
 }
 
 // calendars 公历和农历
-func (sc *Calendar)calendars(sd *Date)[]*CalendarData{
+func (sc *Calendar) calendars(sd *Date) []*CalendarData {
 	var cds []*CalendarData
 	solarDates := sc.solarCalendar(sd)
-	for _,dv := range solarDates {
+	for _, dv := range solarDates {
 		cd := new(CalendarData)
 		cd.SD = dv
-		ld,err := sc.Solar2Lunar(dv)
+		ld, err := sc.Solar2Lunar(dv)
 		if err == nil {
 			cd.LD = ld
 		}
-		cds = append(cds,cd)
+		cds = append(cds, cd)
 	}
 
 	return cds
 }
 
 // solarCalendar 公历日历
-func (sc *Calendar)solarCalendar(sd *Date)[]*SolarDate{
+func (sc *Calendar) solarCalendar(sd *Date) []*SolarDate {
 	var jqmap map[string]*SolarJQ
 	var err error
 	if sc.Getjq {
 		// 取节气
-		_,jqmap,err = sc.Jieqi(sd.Year)
+		_, jqmap, err = sc.Jieqi(sd.Year)
 		if err != nil {
 			jqmap = nil
 		}
 	}
-
 
 	if sc.Grid == GridDay {
 		insd := new(SolarDate)
 		insd.Date = sd.clone()
 		sc.tianGanDiZhi(insd)
 		if sc.Getjq {
-			jqindex := fmt.Sprintf("%d-%d-%d",insd.Date.Year,insd.Date.Month,insd.Date.Day)
-			if jqv,ok := jqmap[jqindex];ok{
+			jqindex := fmt.Sprintf("%d-%d-%d", insd.Date.Year, insd.Date.Month, insd.Date.Day)
+			if jqv, ok := jqmap[jqindex]; ok {
 				insd.Jq = jqv
 			}
 		}
 		return []*SolarDate{insd}
-	}else if sc.Grid == GridWeek{
+	} else if sc.Grid == GridWeek {
 		return sc.weekCalendar(sd, jqmap)
-	}else if sc.Grid == GridMonth {
+	} else if sc.Grid == GridMonth {
 		var resultDate []*SolarDate
 		mFirstDayDate := sd.monthFirstDayDate()
 		for i := 0; i < 6; i++ {
 			addDays := i * 7
-			resultDate = append(resultDate,sc.weekCalendar(mFirstDayDate.addDays(addDays), jqmap)...)
+			resultDate = append(resultDate, sc.weekCalendar(mFirstDayDate.addDays(addDays), jqmap)...)
 		}
 
 		return resultDate
@@ -277,7 +282,7 @@ func (sc *Calendar)solarCalendar(sd *Date)[]*SolarDate{
 }
 
 // weekCalendar 按周取日历
-func (sc *Calendar)weekCalendar(sd *Date,jqmap map[string]*SolarJQ)[]*SolarDate{
+func (sc *Calendar) weekCalendar(sd *Date, jqmap map[string]*SolarJQ) []*SolarDate {
 	var subdays int
 	if sd.Week >= sc.FirstWeek {
 		subdays = sd.Week - sc.FirstWeek
@@ -291,8 +296,8 @@ func (sc *Calendar)weekCalendar(sd *Date,jqmap map[string]*SolarJQ)[]*SolarDate{
 		insd.Date = firstDate.addDays(i)
 		sc.tianGanDiZhi(insd)
 		if sc.Getjq {
-			jqindex := fmt.Sprintf("%d-%d-%d",insd.Date.Year,insd.Date.Month,insd.Date.Day)
-			if jqv,ok := jqmap[jqindex];ok{
+			jqindex := fmt.Sprintf("%d-%d-%d", insd.Date.Year, insd.Date.Month, insd.Date.Day)
+			if jqv, ok := jqmap[jqindex]; ok {
 				insd.Jq = jqv
 			}
 		}
@@ -302,7 +307,7 @@ func (sc *Calendar)weekCalendar(sd *Date,jqmap map[string]*SolarJQ)[]*SolarDate{
 }
 
 // DateToSolarDate 用Date初始SolarDate
-func (sc *Calendar)DateToSolarDate(d *Date)*SolarDate{
+func (sc *Calendar) DateToSolarDate(d *Date) *SolarDate {
 	sd := new(SolarDate)
 	sd.Date = d.clone()
 	sc.tianGanDiZhi(sd)
@@ -310,7 +315,7 @@ func (sc *Calendar)DateToSolarDate(d *Date)*SolarDate{
 }
 
 // Solar2Julian 将公历时间转换为儒略日历时间
-func (sc *Calendar) Solar2Julian(sd *Date) (float64,error) {
+func (sc *Calendar) Solar2Julian(sd *Date) (float64, error) {
 
 	if sc.Loc == nil {
 		sc.Loc = time.Local
@@ -328,7 +333,6 @@ func (sc *Calendar) Solar2Julian(sd *Date) (float64,error) {
 	var init float64 = 0
 	var jdy float64
 
-
 	if (yy > 1582) || (yy == 1582 && mm > 10) || (yy == 1582 && mm == 10 && dd >= 15) {
 		init = 1721119.5
 		jdy = math.Floor(yp*365.25) - math.Floor(yp/100) + math.Floor(yp/400)
@@ -340,7 +344,7 @@ func (sc *Calendar) Solar2Julian(sd *Date) (float64,error) {
 
 	// 因历法转换,现用公历中1582年10月5日-14日是不存在的
 	if init == 0 {
-		return 0,errors.New("公历1582年10月5日-14日被跳过")
+		return 0, errors.New("公历1582年10月5日-14日被跳过")
 	}
 
 	mp := float64(int(mm+9) % 12)
@@ -348,11 +352,11 @@ func (sc *Calendar) Solar2Julian(sd *Date) (float64,error) {
 	jdd := dd - 1
 	jdh := (hh + (mi+(ss/60))/60) / 24
 
-	return Round(jdy+jdm+float64(jdd)+float64(jdh)+init, 7),nil
+	return Round(jdy+jdm+float64(jdd)+float64(jdh)+init, 7), nil
 }
 
 // Julian2Solar 将儒略日历时间转换为公历(格里高利历)时间
-func (sc *Calendar)Julian2Solar(jd float64) *Date {
+func (sc *Calendar) Julian2Solar(jd float64) *Date {
 	if sc.Loc == nil {
 		sc.Loc = time.Local
 	}
@@ -397,12 +401,12 @@ func (sc *Calendar)Julian2Solar(jd float64) *Date {
 	mm := math.Floor(m)
 	dd := math.Floor(da)
 
-	t := time.Date(int(yy),time.Month(int(mm)),int(dd),int(hh),int(mt),int(ss),0,sc.Loc)
+	t := time.Date(int(yy), time.Month(int(mm)), int(dd), int(hh), int(mt), int(ss), 0, sc.Loc)
 	return TimeToDate(t)
 }
 
 // Solar2Lunar 将公历日期转换成农历日期
-func (sc *Calendar) Solar2Lunar(sd *SolarDate) (*LunarDate,error) {
+func (sc *Calendar) Solar2Lunar(sd *SolarDate) (*LunarDate, error) {
 
 	if sc.Loc == nil {
 		sc.Loc = time.Local
@@ -413,12 +417,12 @@ func (sc *Calendar) Solar2Lunar(sd *SolarDate) (*LunarDate,error) {
 	s.Hour = 12
 	s.Min = 0
 	s.Sec = 0
-	jd,err := sc.Solar2Julian(s)
+	jd, err := sc.Solar2Julian(s)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 	prev := 0
-	_, jdnm, mc,err := sc.zqAndSMandLunarMonthCode(s.Year)
+	_, jdnm, mc, err := sc.zqAndSMandLunarMonthCode(s.Year)
 
 	if err != nil {
 		return nil, err
@@ -429,7 +433,7 @@ func (sc *Calendar) Solar2Lunar(sd *SolarDate) (*LunarDate,error) {
 		prev = 1
 		_, jdnm, mc, err = sc.zqAndSMandLunarMonthCode(s.prevYear().Year)
 		if err != nil {
-			return nil,err
+			return nil, err
 		}
 	}
 
@@ -456,23 +460,23 @@ func (sc *Calendar) Solar2Lunar(sd *SolarDate) (*LunarDate,error) {
 	}
 
 	ld.Month = int(math.Floor(mc[mi]+10))%12 + 1 // 月
-	ld.MonthStr = MonthChinese(ld.Month )
+	ld.MonthStr = MonthChinese(ld.Month)
 
 	if isLeapMonth == 1 {
 		ld.LeapMonth = 1 // 当前月是闰月
 		ld.LeapStr = LeapStr
 	}
 
-	ld.MonthDays,err = sc.lunarDays(ld.Year,ld.Month,isLeapMonth)
+	ld.MonthDays, err = sc.lunarDays(ld.Year, ld.Month, isLeapMonth)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 
 	ld.Day = int(math.Floor(jd) - math.Floor(jdnm[mi]+0.5) + 1) // 日,此处加1是因为每月初一从1开始而非从0开始
 	ld.DayStr = DayChinese(ld.Day)
 
 	sc.lunarYearGanZiCommon(ld)
-	return ld,err
+	return ld, err
 }
 
 // Lunar2Solar 将农历日期转换成公历日期
@@ -482,23 +486,23 @@ func (sc *Calendar) Lunar2Solar(ly, lm, ld, isLeap int) (*SolarDate, error) {
 	}
 
 	if ly < -7000 || ly > 7000 {
-		return nil,errors.New("年份超出限制")
+		return nil, errors.New("年份超出限制")
 	}
 	if ly < -1000 || ly > 3000 { // 适用于西元-1000年至西元3000年,超出此范围误差较大
-		return nil,errors.New("年份限制西元-1000年至西元3000年")
+		return nil, errors.New("年份限制西元-1000年至西元3000年")
 	}
 
 	if lm < 1 {
 		lm = 1
-	}else if lm > 12 {
+	} else if lm > 12 {
 		lm = 12
 	}
 	if ld < 1 {
 		ld = 1
-	}else if ld > 29 {
-		ldt,err := sc.lunarDays(ly,lm,0)
+	} else if ld > 29 {
+		ldt, err := sc.lunarDays(ly, lm, 0)
 		if err != nil {
-			return nil,err
+			return nil, err
 		}
 		ld = ldt
 	}
@@ -529,15 +533,15 @@ func (sc *Calendar) Lunar2Solar(ly, lm, ld, isLeap int) (*SolarDate, error) {
 
 	if I2b(isLeap) { // 若是闰月
 		if leap < 3 { // 而旗标非闰月或非本年闰月,则表示此年不含闰月.leap=0代表无闰月,=1代表闰月为前一年的11月,=2代表闰月为前一年的12月
-			return nil,errors.New("此年非闰年") // 此年非闰年
+			return nil, errors.New("此年非闰年") // 此年非闰年
 		} else { // 若本年內有闰月
 			if leap != mm { // 但不为指入的月份
-				return nil,errors.New("该月非闰月") // 则指定的月份非闰月,此月非闰月
+				return nil, errors.New("该月非闰月") // 则指定的月份非闰月,此月非闰月
 			} else { // 若输入的月份即为闰月
 				if lm <= nofd[mm] { // 若指定的日期不大于当月的天數
 					jd = jdnm[mm] + float64(ld) - 1 // 则将当月之前的JD值加上日期之前的天數
 				} else { // 日期超出范围
-					return nil,errors.New("日期超出范围")
+					return nil, errors.New("日期超出范围")
 				}
 			}
 		}
@@ -546,19 +550,19 @@ func (sc *Calendar) Lunar2Solar(ly, lm, ld, isLeap int) (*SolarDate, error) {
 			if ld <= nofd[mm-1] { // 若輸入的日期不大於當月的天數
 				jd = jdnm[mm-1] + float64(ld) - 1 // 則將當月之前的JD值加上日期之前的天數
 			} else { // 日期超出范围
-				return nil,errors.New("日期超出范围")
+				return nil, errors.New("日期超出范围")
 			}
 		} else { // 若旗標為本年有閏月(包括前一年的11月起之月份) 公式nofd(mx - (mx > leap) - 1)的用意為:若指定月大於閏月,則索引用mx,否則索引用mx-1
 			if ld <= nofd[mm+B2i(mm > leap)-1] { // 若輸入的日期不大於當月的天數
 				jd = jdnm[mm+B2i(mm > leap)-1] + float64(ld) - 1 // 則將當月之前的JD值加上日期之前的天數
 			} else { // 日期超出范围
-				return nil,errors.New("日期超出范围")
+				return nil, errors.New("日期超出范围")
 			}
 		}
 	}
 
 	d := sc.Julian2Solar(jd)
-	ch,cmi,cs := timeFun().In(sc.Loc).Clock()
+	ch, cmi, cs := timeFun().In(sc.Loc).Clock()
 	d.Hour = ch
 	d.Min = cmi
 	d.Sec = cs
@@ -569,22 +573,22 @@ func (sc *Calendar) Lunar2Solar(ly, lm, ld, isLeap int) (*SolarDate, error) {
 
 	// 取节气
 	if sc.Getjq {
-		_,jqmap,err := sc.Jieqi(sd.Year)
+		_, jqmap, err := sc.Jieqi(sd.Year)
 		if err == nil {
-			jqindex := fmt.Sprintf("%d-%d-%d",d.Year,d.Month,d.Day)
-			if jqv,ok := jqmap[jqindex];ok{
+			jqindex := fmt.Sprintf("%d-%d-%d", d.Year, d.Month, d.Day)
+			if jqv, ok := jqmap[jqindex]; ok {
 				sd.Jq = jqv
 			}
 		}
 	}
 
-	return sd,nil
+	return sd, nil
 }
 
 // Jieqi 求出含某公历年立春点开始的24节气
 // 这里为了日历好显示，取27个节气，从上一年的冬至开始
 // 返回[]*SolarJQ是一个有序切片,map[string]*SolarJQ是一个以"年-月-日"为索引的map
-func (sc *Calendar)Jieqi(year int) ([]*SolarJQ, map[string]*SolarJQ, error) {
+func (sc *Calendar) Jieqi(year int) ([]*SolarJQ, map[string]*SolarJQ, error) {
 
 	if sc.Loc == nil {
 		sc.Loc = time.Local
@@ -595,9 +599,9 @@ func (sc *Calendar)Jieqi(year int) ([]*SolarJQ, map[string]*SolarJQ, error) {
 	var jq []*SolarJQ
 	var jqmap = make(map[string]*SolarJQ)
 
-	dj,err := adjustedJQ(year-1, 18, 23)
+	dj, err := adjustedJQ(year-1, 18, 23)
 	if err != nil {
-		return nil,nil,err
+		return nil, nil, err
 	}
 
 	ji := -1
@@ -624,13 +628,13 @@ func (sc *Calendar)Jieqi(year int) ([]*SolarJQ, map[string]*SolarJQ, error) {
 		}
 		jq = append(jq, sjq)
 
-		mindex := fmt.Sprintf("%d-%d-%d",jqdate.Year,jqdate.Month,jqdate.Day)
+		mindex := fmt.Sprintf("%d-%d-%d", jqdate.Year, jqdate.Month, jqdate.Day)
 		jqmap[mindex] = sjq
 	}
 
-	dj,err = adjustedJQ(year, 0, 20)
+	dj, err = adjustedJQ(year, 0, 20)
 	if err != nil {
-		return nil,nil,err
+		return nil, nil, err
 	}
 
 	for _, v := range dj {
@@ -648,30 +652,30 @@ func (sc *Calendar)Jieqi(year int) ([]*SolarJQ, map[string]*SolarJQ, error) {
 		}
 		jq = append(jq, sjq)
 
-		mindex := fmt.Sprintf("%d-%d-%d",jqdate.Year,jqdate.Month,jqdate.Day)
+		mindex := fmt.Sprintf("%d-%d-%d", jqdate.Year, jqdate.Month, jqdate.Day)
 		jqmap[mindex] = sjq
 	}
 
-	return jq,jqmap,nil
+	return jq, jqmap, nil
 }
 
 // tianGanDiZhi 公历对应的干支 以立春时间开始
-func (sc *Calendar) tianGanDiZhi(sd *SolarDate){
+func (sc *Calendar) tianGanDiZhi(sd *SolarDate) {
 	sdgz := new(SolarTianGanDiZhi)
 
 	s := sd.clone()
 
-	jd,err := sc.Solar2Julian(s)
+	jd, err := sc.Solar2Julian(s)
 	if err != nil {
 		return
 	}
-	jq,err := pureJQsinceSpring(s.Year)
+	jq, err := pureJQsinceSpring(s.Year)
 	if err != nil {
 		return
 	}
 	if jd < jq[1] {
 		s = s.prevYear()
-		jq,err = pureJQsinceSpring(s.Year)
+		jq, err = pureJQsinceSpring(s.Year)
 		if err != nil {
 			return
 		}
@@ -726,18 +730,16 @@ func (sc *Calendar) tianGanDiZhi(sd *SolarDate){
 	sd.GanZhi = sdgz
 }
 
-
-
 // smSinceWinterSolstice 求算以含冬至中气为阴历11月开始的连续16个朔望月
-func (sc *Calendar)smSinceWinterSolstice(year int, jdws float64) ([16]float64,error) {
+func (sc *Calendar) smSinceWinterSolstice(year int, jdws float64) ([16]float64, error) {
 
 	tjd := [20]float64{}
 	jdnm := [16]float64{}
 
 	// 求年初前两个月附近的新月点(即前一年的11月初)
-	jd,err := sc.Solar2Julian(YmdNewDate(year,11,1,sc.Loc).prevYear())
+	jd, err := sc.Solar2Julian(YmdNewDate(year, 11, 1, sc.Loc).prevYear())
 	if err != nil {
-		return jdnm,err
+		return jdnm, err
 	}
 
 	// 求得自2000年1月起第kn个平均朔望日及其JD值
@@ -772,26 +774,26 @@ func (sc *Calendar)smSinceWinterSolstice(year int, jdws float64) ([16]float64,er
 	for k := 0; k <= 15; k++ { // 取上一步的索引值
 		jdnm[k] = tjd[kj-1+k] // 重排索引,使含冬至朔望月的索引为0
 	}
-	
-	return jdnm,nil
+
+	return jdnm, nil
 
 }
 
 // zqAndSMandLunarMonthCode 以比较日期法求算冬月及其余各月名称代码,包含闰月,冬月为0,腊月为1,正月为2,其余类推.闰月多加0.5
-func (sc *Calendar)zqAndSMandLunarMonthCode(year int) ([15]float64, [16]float64, [15]float64, error) {
+func (sc *Calendar) zqAndSMandLunarMonthCode(year int) ([15]float64, [16]float64, [15]float64, error) {
 
 	mc := [15]float64{}
 	// 求出自冬至点为起点的连续15个中气
-	jdzq,err := zqSinceWinterSolstice(year)
+	jdzq, err := zqSinceWinterSolstice(year)
 	if err != nil {
 		fmt.Println(err.Error())
-		return [15]float64{},[16]float64{},[15]float64{},err
+		return [15]float64{}, [16]float64{}, [15]float64{}, err
 	}
 
 	// 求出以含冬至中气为阴历11月(冬月)开始的连续16个朔望月的新月點
-	jdnm,err := sc.smSinceWinterSolstice(year, jdzq[0])
+	jdnm, err := sc.smSinceWinterSolstice(year, jdzq[0])
 	if err != nil {
-		return [15]float64{},[16]float64{},[15]float64{},err
+		return [15]float64{}, [16]float64{}, [15]float64{}, err
 	}
 	// 设定旗标,0表示未遇到闰月,1表示已遇到闰月
 	yz := 0
@@ -832,7 +834,7 @@ func (sc *Calendar)zqAndSMandLunarMonthCode(year int) ([15]float64, [16]float64,
 }
 
 // leap 获取农历某年的闰月,0为无闰月
-func (sc *Calendar)leap(ly int) int {
+func (sc *Calendar) leap(ly int) int {
 	_, _, mc, err := sc.zqAndSMandLunarMonthCode(ly)
 	if err != nil {
 		return 0
@@ -878,17 +880,17 @@ func (sc *Calendar) lunarDays(ly, lm, isLeap int) (int, error) {
 
 	if I2b(isLeap) { // 若是闰月
 		if leap < 3 { // 而旗标非闰月或非本年闰月,则表示此年不含闰月.leap=0代表无闰月,=1代表闰月为前一年的11月,=2代表闰月为前一年的12月
-			return 0,errors.New("该年非闰年")
+			return 0, errors.New("该年非闰年")
 		}
 		// 若本年內有闰月
 		if leap != lm { // 但不为指定的月份
-			return 0,errors.New("该月非该年的闰月")
+			return 0, errors.New("该月非该年的闰月")
 		} else { // 若指定的月份即为闰月
 			dy = nofd[lm]
 		}
 	} else { // 若没有指明是闰月
 		if leap == 0 { // 若旗标非闰月,则表示此年不含闰月(包括前一年的11月起之月份)
-			dy = nofd[lm - 1]
+			dy = nofd[lm-1]
 		} else { // 若旗标为本年有闰月(包括前一年的11月起之月份) 公式nofd(mx - (mx > leap) - 1)的用意为:若指定月大于闰月,则索引用mx,否则索引用mx-1
 			dy = nofd[lm+B2i(lm > leap)-1]
 		}
@@ -898,38 +900,38 @@ func (sc *Calendar) lunarDays(ly, lm, isLeap int) (int, error) {
 }
 
 // 农历年干支通俗记法，以春节开始
-func (sc *Calendar)lunarYearGanZiCommon(ld *LunarDate){
+func (sc *Calendar) lunarYearGanZiCommon(ld *LunarDate) {
 	gk := (ld.Year - 3) % 10
 	zk := (ld.Year - 3) % 12
 
 	if gk == 0 {
 		gk = 9
-	}else {
+	} else {
 		gk -= 1
 	}
 
 	if zk == 0 {
 		zk = 11
-	}else {
+	} else {
 		zk -= 1
 	}
 	ld.YearGanZi = &LunarYearGanZi{
-		Gan:TianGanArray[gk],
-		Zhi:DiZhiArray[zk],
-		Animal:SymbolicAnimalsArray[zk],
+		Gan:    TianGanArray[gk],
+		Zhi:    DiZhiArray[zk],
+		Animal: SymbolicAnimalsArray[zk],
 	}
 }
 
 // WeekChinese 星期中文
-func WeekChinese(w int)string{
-	if w <0 || w > 6 {
+func WeekChinese(w int) string {
+	if w < 0 || w > 6 {
 		return ""
 	}
 	return NumberChineseArray[w]
 }
 
 // MonthChinese 农历月份常用名称
-func MonthChinese(m int)string{
+func MonthChinese(m int) string {
 	if m > 0 && m <= 12 {
 		return MonthChineseArray[m-1]
 	}
@@ -937,7 +939,7 @@ func MonthChinese(m int)string{
 }
 
 // DayChinese 农历日期数字返回汉字表示法
-func DayChinese(d int)string{
+func DayChinese(d int) string {
 	daystr := ""
 	if d < 1 || d > 30 {
 		return ""
@@ -979,13 +981,13 @@ func trueNewMoon(k float64) float64 {
 	t := (jdt - 2451545) / 36525 // 2451545为2000年1月1日正午12时的JD
 
 	// t2 := t * t // square for frequent use
-	t2 := math.Pow(t,2)
+	t2 := math.Pow(t, 2)
 
 	// t3 := t2 * t // cube for frequent use
-	t3 := math.Pow(t,3)
+	t3 := math.Pow(t, 3)
 
 	// t4 := t3 * t // to the fourth
-	t4 := math.Pow(t,4)
+	t4 := math.Pow(t, 4)
 
 	// mean time of phase
 	// 加上调整值0.0001337*t2 - 0.00000015*t3 + 0.00000000073*t4
@@ -1001,9 +1003,9 @@ func trueNewMoon(k float64) float64 {
 	// 乘式因子
 	es := 1 - 0.002516*t - 0.0000074*t2
 	// 因perturbation造成的偏移
-	pi180 := math.Pi/180
-	apt1 := -0.4072 * math.Sin(pi180 * mprime)
-	apt1 += 0.17241 * es * math.Sin(pi180 * m)
+	pi180 := math.Pi / 180
+	apt1 := -0.4072 * math.Sin(pi180*mprime)
+	apt1 += 0.17241 * es * math.Sin(pi180*m)
 	apt1 += 0.01608 * math.Sin(pi180*2*mprime)
 	apt1 += 0.01039 * math.Sin(pi180*2*f)
 	apt1 += 0.00739 * es * math.Sin(pi180*(mprime-m))
@@ -1057,7 +1059,7 @@ func meanNewMoon(jd float64) (float64, float64) {
 
 	// Time in Julian centuries from 2000 January 0.5.
 	t := (jdt - 2451545) / 36525
-	thejd := jdt + 0.0001337 * math.Pow(t,2) - 0.00000015 * math.Pow(t,3) + 0.00000000073 * math.Pow(t,4)
+	thejd := jdt + 0.0001337*math.Pow(t, 2) - 0.00000015*math.Pow(t, 3) + 0.00000000073*math.Pow(t, 4)
 
 	return kn, thejd
 }
@@ -1069,80 +1071,80 @@ func meanNewMoon(jd float64) (float64, float64) {
 func ve(year int) (float64, error) {
 
 	if year < -8000 {
-		return 0,errors.New("年份超出限制")
+		return 0, errors.New("年份超出限制")
 	}
 	if year > 8001 {
-		return 0,errors.New("年份超出限制")
+		return 0, errors.New("年份超出限制")
 	}
 
 	if year >= 1000 && year <= 8001 {
 		m := (float64(year) - 2000) / 1000
-		s := 2451623.80984 + 365242.37404*m + 0.05169 * math.Pow(m,2) - 0.00411 * math.Pow(m,3) - 0.00057 * math.Pow(m,4)
-		return s,nil
+		s := 2451623.80984 + 365242.37404*m + 0.05169*math.Pow(m, 2) - 0.00411*math.Pow(m, 3) - 0.00057*math.Pow(m, 4)
+		return s, nil
 	}
 
 	if year >= -8000 && year < 1000 {
 		m := float64(year) / 1000
-		s := 1721139.29189 + 365242.1374 * m + 0.06134 * math.Pow(m,2) + 0.00111 * math.Pow(m,3) - 0.00071 * math.Pow(m,4)
-		return s,nil
+		s := 1721139.29189 + 365242.1374*m + 0.06134*math.Pow(m, 2) + 0.00111*math.Pow(m, 3) - 0.00071*math.Pow(m, 4)
+		return s, nil
 	}
 
-	return 0,errors.New("年份超出限制")
+	return 0, errors.New("年份超出限制")
 }
 
 // deltaT 求∆t
 func deltaT(year, month int) float64 {
 
-	y := float64(year) + (float64(month)-0.5) / 12
+	y := float64(year) + (float64(month)-0.5)/12
 
 	var dt float64
 
 	switch {
 	case y <= -500:
 		t := (y - 1820) / 100
-		dt = -20 + 32 * math.Pow(t,2)
+		dt = -20 + 32*math.Pow(t, 2)
 	case y < 500:
 		t := y / 100
-		dt = 10583.6 - 1014.41 * t + 33.78311 * math.Pow(t,2) - 5.952053 * math.Pow(t,3) - 0.1798452 * math.Pow(t,4) + 0.022174192 * math.Pow(t,5) + 0.0090316521 * math.Pow(t,6)
+		dt = 10583.6 - 1014.41*t + 33.78311*math.Pow(t, 2) - 5.952053*math.Pow(t, 3) - 0.1798452*math.Pow(t, 4) + 0.022174192*math.Pow(t, 5) + 0.0090316521*math.Pow(t, 6)
 	case y < 1600:
 		t := (y - 1000) / 100
-		dt = 1574.2 - 556.01 * t + 71.23472 * math.Pow(t,2) + 0.319781 * math.Pow(t,3) - 0.8503463 * math.Pow(t,4) - 0.005050998 * math.Pow(t,5) + 0.0083572073 * math.Pow(t,6)
+		dt = 1574.2 - 556.01*t + 71.23472*math.Pow(t, 2) + 0.319781*math.Pow(t, 3) - 0.8503463*math.Pow(t, 4) - 0.005050998*math.Pow(t, 5) + 0.0083572073*math.Pow(t, 6)
 	case y < 1700:
 		t := y - 1600
-		dt = 120 - 0.9808 * t - 0.01532 * math.Pow(t,2) + math.Pow(t,3) / 7129
+		dt = 120 - 0.9808*t - 0.01532*math.Pow(t, 2) + math.Pow(t, 3)/7129
 	case y < 1800:
 		t := y - 1700
-		dt = 8.83 + 0.1603 * t - 0.0059285 * math.Pow(t,2) + 0.00013336 * math.Pow(t,3) - math.Pow(t,4)/1174000
+		dt = 8.83 + 0.1603*t - 0.0059285*math.Pow(t, 2) + 0.00013336*math.Pow(t, 3) - math.Pow(t, 4)/1174000
 	case y < 1860:
 		t := y - 1800
-		dt = 13.72 - 0.332447*t + 0.0068612*math.Pow(t,2) + 0.0041116 * math.Pow(t,3) - 0.00037436 * math.Pow(t,4) + 0.0000121272 * math.Pow(t,5) - 0.0000001699 * math.Pow(t,6) + 0.000000000875 * math.Pow(t,7)
+		dt = 13.72 - 0.332447*t + 0.0068612*math.Pow(t, 2) + 0.0041116*math.Pow(t, 3) - 0.00037436*math.Pow(t, 4) + 0.0000121272*math.Pow(t, 5) - 0.0000001699*math.Pow(t, 6) + 0.000000000875*math.Pow(t, 7)
 	case y < 1900:
 		t := y - 1860
-		dt = 7.62 + 0.5737 * t - 0.251754 * math.Pow(t,2) + 0.01680668 * math.Pow(t,3) - 0.0004473624 * math.Pow(t,4) + math.Pow(t,5) / 233174
+		dt = 7.62 + 0.5737*t - 0.251754*math.Pow(t, 2) + 0.01680668*math.Pow(t, 3) - 0.0004473624*math.Pow(t, 4) + math.Pow(t, 5)/233174
 	case y < 1920:
 		t := y - 1900
-		dt = -2.79 + 1.494119 * t - 0.0598939 * math.Pow(t,2) + 0.0061966 * math.Pow(t,3) - 0.000197 * math.Pow(t,4)
+		dt = -2.79 + 1.494119*t - 0.0598939*math.Pow(t, 2) + 0.0061966*math.Pow(t, 3) - 0.000197*math.Pow(t, 4)
 	case y < 1941:
 		t := y - 1920
-		dt = 21.2 + 0.84493 * t - 0.0761 * math.Pow(t,2) + 0.0020936 * math.Pow(t,3)
+		dt = 21.2 + 0.84493*t - 0.0761*math.Pow(t, 2) + 0.0020936*math.Pow(t, 3)
 	case y < 1961:
 		t := y - 1950
-		dt = 29.07 + 0.407 * t - math.Pow(t,2) / 233 + math.Pow(t,3) / 2547
+		dt = 29.07 + 0.407*t - math.Pow(t, 2)/233 + math.Pow(t, 3)/2547
 	case y < 1986:
 		t := y - 1975
-		dt = 45.45 + 1.067 * t - math.Pow(t,2) / 260 - math.Pow(t,3) / 718
+		dt = 45.45 + 1.067*t - math.Pow(t, 2)/260 - math.Pow(t, 3)/718
 	case y < 2005:
 		t := y - 2000
-		dt = 63.86 + 0.3345 * t - 0.060374 * math.Pow(t,2) + 0.0017275 * math.Pow(t,3) + 0.000651814 * math.Pow(t,4) + 0.00002373599 * math.Pow(t,5)
+		dt = 63.86 + 0.3345*t - 0.060374*math.Pow(t, 2) + 0.0017275*math.Pow(t, 3) + 0.000651814*math.Pow(t, 4) + 0.00002373599*math.Pow(t, 5)
 	case y < 2050:
 		t := y - 2000
-		dt = 62.92 + 0.32217 * t + 0.005589 * math.Pow(t,2)
+		dt = 62.92 + 0.32217*t + 0.005589*math.Pow(t, 2)
 	case y < 2150:
 		t := (y - 1820) / 100
-		dt = -20 + 32 * math.Pow(t,2) - 0.5628 * (2150 - y)
+		dt = -20 + 32*math.Pow(t, 2) - 0.5628*(2150-y)
 	default:
 		t := (y - 1820) / 100
-		dt = -20 + 32 * math.Pow(t,2)
+		dt = -20 + 32*math.Pow(t, 2)
 	}
 
 	if y < 1955 || y >= 2005 {
@@ -1162,14 +1164,14 @@ func meanJqJd(year int) ([26]float64, error) {
 
 	// 该年的春分點
 
-	jd,err := ve(year)
+	jd, err := ve(year)
 	if err != nil {
-		return [26]float64{},err
+		return [26]float64{}, err
 	}
 	// 该年的回归年长
-	ntjd,err := ve(year+1)
+	ntjd, err := ve(year + 1)
 	if err != nil {
-		return jqjd,err
+		return jqjd, err
 	}
 	ty := ntjd - jd
 
@@ -1216,7 +1218,7 @@ func meanJqJd(year int) ([26]float64, error) {
 	for i := 0; i < cap(peri); i++ {
 		jqjd[i] = Round(jd+peri[i]-peri[0], 8)
 	}
-	return jqjd,nil
+	return jqjd, nil
 }
 
 // adjustedJQ 获取指定年的春分开始作Perturbaton调整后的24节气,可以多取2个
@@ -1225,9 +1227,9 @@ func adjustedJQ(year, start, end int) ([26]float64, error) {
 	jq := [26]float64{}
 
 	// 获取该年春分开始的24节气时间点
-	jqjd,err := meanJqJd(year)
+	jqjd, err := meanJqJd(year)
 	if err != nil {
-		return [26]float64{},err
+		return [26]float64{}, err
 	}
 
 	for k, jd := range jqjd {
@@ -1245,7 +1247,7 @@ func adjustedJQ(year, start, end int) ([26]float64, error) {
 		month := int(math.Floor((float64(k)+1)/2) + 3)
 		dt := deltaT(year, month)
 		// 因中国(北京、重庆、上海)时间比格林威治时间先行8小时，即1/3日
-		jq[k] = Round(jd+ptb-dt/60/24 + float64(1)/3, 8)
+		jq[k] = Round(jd+ptb-dt/60/24+float64(1)/3, 8)
 	}
 
 	return jq, nil
@@ -1255,9 +1257,9 @@ func adjustedJQ(year, start, end int) ([26]float64, error) {
 func pureJQsinceSpring(year int) ([16]float64, error) {
 	jdpjq := [16]float64{}
 
-	dj,err := adjustedJQ(year-1, 19, 23)
+	dj, err := adjustedJQ(year-1, 19, 23)
 	if err != nil {
-		return jdpjq,err
+		return jdpjq, err
 	}
 
 	ki := -1 // 数组索引
@@ -1276,9 +1278,9 @@ func pureJQsinceSpring(year int) ([16]float64, error) {
 		jdpjq[ki] = v
 	}
 
-	dj,err = adjustedJQ(year, 0, 25)
+	dj, err = adjustedJQ(year, 0, 25)
 	if err != nil {
-		return [16]float64{},err
+		return [16]float64{}, err
 	}
 
 	for k, v := range dj {
@@ -1290,15 +1292,15 @@ func pureJQsinceSpring(year int) ([16]float64, error) {
 		jdpjq[ki] = v
 	}
 
-	return jdpjq,err
+	return jdpjq, err
 }
 
 // zqSinceWinterSolstice 求出自冬至点为起点的连续15个中气
 func zqSinceWinterSolstice(year int) ([15]float64, error) {
 	jdpjq := [15]float64{}
-	dj,err := adjustedJQ(year-1, 18, 23)
+	dj, err := adjustedJQ(year-1, 18, 23)
 	if err != nil {
-		return jdpjq,err
+		return jdpjq, err
 	}
 
 	jdpjq[0] = dj[18] // 冬至
@@ -1306,9 +1308,9 @@ func zqSinceWinterSolstice(year int) ([15]float64, error) {
 	jdpjq[2] = dj[22] // 雨水
 
 	// 求出指定年节气之JD值
-	dj,err = adjustedJQ(year, 0, 23)
+	dj, err = adjustedJQ(year, 0, 23)
 	if err != nil {
-		return [15]float64{},err
+		return [15]float64{}, err
 	}
 
 	ki := 2 // 数组索引
@@ -1322,11 +1324,3 @@ func zqSinceWinterSolstice(year int) ([15]float64, error) {
 	}
 	return jdpjq, err
 }
-
-
-
-
-
-
-
-

@@ -8,7 +8,7 @@
 
 Author: liujiawm@gmail.com
 
-Version: "1.0.1"
+Version: "1.0.2"
 
 日历按月取时固定为42个日期，按周取时固定为7个日期
 
