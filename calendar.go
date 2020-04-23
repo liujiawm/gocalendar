@@ -163,6 +163,11 @@ func NewCalendar(c *Calendar)*Calendar{
 		Getjq:     c.Getjq,
 	}
 }
+// NowCalendars 当前时间的日历,包括公历和农历
+func (sc *Calendar)NowCalendars()[]*CalendarData{
+	nt := timeFun().In(sc.Loc)
+	return sc.calendars(TimeToDate(nt))
+}
 
 // Calendars 日历,包括公历和农历
 func (sc *Calendar)Calendars(y,m,d int)[]*CalendarData{
@@ -188,6 +193,17 @@ func (sc *Calendar)Calendars(y,m,d int)[]*CalendarData{
 	return cds
 }
 
+// SolarCalendar 当前时间time.Now() 日历,公历
+func (sc *Calendar)NowSolarCalendar()[]*SolarDate{
+	if sc.Loc == nil {
+		sc.Loc = time.Local
+	}
+	if sc.FirstWeek< 0 || sc.FirstWeek > 6 {
+		sc.FirstWeek = 0
+	}
+	sd := TimeToDate(timeFun().In(sc.Loc))
+	return sc.solarCalendar(sd)
+}
 // SolarCalendar 日历,公历
 func (sc *Calendar)SolarCalendar(y,m,d int)[]*SolarDate{
 	if sc.Loc == nil {
@@ -200,6 +216,28 @@ func (sc *Calendar)SolarCalendar(y,m,d int)[]*SolarDate{
 	hour,min,sec := timeFun().In(sc.Loc).Clock()
 	sd := TimeToDate(time.Date(y,time.Month(m),d,hour,min,sec,0,sc.Loc))
 
+	return sc.solarCalendar(sd)
+}
+
+// calendars 公历和农历
+func (sc *Calendar)calendars(sd *Date)[]*CalendarData{
+	var cds []*CalendarData
+	solarDates := sc.solarCalendar(sd)
+	for _,dv := range solarDates {
+		cd := new(CalendarData)
+		cd.SD = dv
+		ld,err := sc.Solar2Lunar(dv)
+		if err == nil {
+			cd.LD = ld
+		}
+		cds = append(cds,cd)
+	}
+
+	return cds
+}
+
+// solarCalendar 公历日历
+func (sc *Calendar)solarCalendar(sd *Date)[]*SolarDate{
 	var jqmap map[string]*SolarJQ
 	var err error
 	if sc.Getjq {
