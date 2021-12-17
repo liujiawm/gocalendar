@@ -19,7 +19,7 @@ import (
 )
 
 const Author = "liujiawm@gmail.com"
-const Version = "1.1.0"
+const Version = "1.1.1.211217_beta"
 
 // type SolarTermItem struct 节气
 type SolarTermItem struct {
