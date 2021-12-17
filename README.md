@@ -4,9 +4,11 @@ calendar、日历、中国农历、阴历、节气、干支、生肖、星座
 
 通过天文计算和民间推算方法，准确计算出公历-1000年至3000年的农历、干支、节气等。
 
-
-
 > 天文计算方法参考Jean Meeus的《Astronomical Algorithms》、[NASA](https://eclipse.gsfc.nasa.gov/SEhelp/deltatpoly2004.html "NASA")网站、[天文与历法](http://www.bieyu.com/ "天文与历法")网站等相关的天文历法计算方法。
+
+当前稳定版本：v1.1.0
+
+`go get github.com/liujiawm/gocalendar@v1.1.0`
 
 - [Installation 安装](#installation-安装)
 - [示例](#示例)
