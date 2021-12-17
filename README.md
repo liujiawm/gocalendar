@@ -20,6 +20,7 @@ calendar、日历、中国农历、阴历、节气、干支、生肖、星座
     - [星座](#星座)
     - [儒略日(Julian Day)](#儒略日(Julian-Day))
     - [Modified Julian Day](#Modified-Julian-Day)
+- [Documentation 更多详细说明](https://pkg.go.dev/github.com/liujiawm/gocalendar)
 - [帮助](https://github.com/liujiawm/gocalendar)
 - 联系
   - QQ:194088
