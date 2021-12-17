@@ -18,8 +18,8 @@ calendar、日历、中国农历、阴历、节气、干支、生肖、星座
     - [早晚子时示例说明](#早晚子时示例说明)
     - [公历转换干支](#公历转换干支)
     - [星座](#星座)
-    - [儒略日(Julian Day)](#儒略日(Julian Day))
-    - [Modified Julian Day](#Modified Julian Day)
+    - [儒略日(Julian Day)](#儒略日(Julian-Day))
+    - [Modified Julian Day](#Modified-Julian-Day)
 - [帮助](https://github.com/liujiawm/gocalendar)
 - 联系
   - QQ:194088
