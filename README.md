@@ -1,278 +1,475 @@
-# gocalendar
+# 日历
 
-一个用golang写的日历，有公历转农历，农历转公历，节气，干支，星座，生肖等功能
+calendar、日历、中国农历、阴历、节气、干支、生肖、星座
 
-中国的农历历法综合了太阳历和月亮历,为中国的生活生产提供了重要的帮助,是中国古人智慧与中国传统文化的一个重要体现
+通过天文计算和民间推算方法，准确计算出公历-1000年至3000年的农历、干支、节气等。
 
-程序比较准确的计算出农历与二十四节气(精确到分),时间限制在1000-3000年间,在实际生产使用中注意限制年份
 
-Author: liujiawm@gmail.com
 
-Version: "1.0.2"
+> 天文计算方法参考Jean Meeus的《Astronomical Algorithms》、[NASA](https://eclipse.gsfc.nasa.gov/SEhelp/deltatpoly2004.html "NASA")网站、[天文与历法](http://www.bieyu.com/ "天文与历法")网站等相关的天文历法计算方法。
 
-日历按月取时固定为42个日期，按周取时固定为7个日期
+- [Installation 安装](#installation-安装)
+- [示例](#示例)
+  - [日历表](#日历表)
+  - [日历配置](#日历配置)
+  - [其它接口](#其它接口)
+    - [节气](#节气)
+    - [农历与公历互换](#农历与公历互换)
+    - [早晚子时示例说明](#早晚子时示例说明)
+    - [公历转换干支](#公历转换干支)
+    - [星座](#星座)
+    - [儒略日(Julian Day)](#儒略日(Julian Day))
+    - [Modified Julian Day](#Modified Julian Day)
+- [帮助](https://github.com/liujiawm/gocalendar)
+- 联系
+  - QQ:194088
+  - Email:liujiawm@msn.com
 
-# 测试代码
+## Installation 安装 ##
 
-## 日历:公历和农历
 ```
-func BenchmarkCalendar_Calendars(b *testing.B) {
-	sc := Calendar{
-		Loc:       time.Local, // 时区,默认time.Local
-		FirstWeek: 1,          // 日历显示时第一列显示周几，(日历表第一列是周几,0周日,依次最大值6)
-		Grid:      GridMonth,  // 取日历方式,默认取一个月, gocalendar.GridDay取一天,gocalendar.GridWeek 取一周,gocalendar.GridMonth取一个月
-		Zwz:       false,      // 是否区分早晚子时(子时从23-01时),true则23:00-24:00算成上一天
-		Getjq:     true,       // 是否取节气
-	}
+go get github.com/liujiawm/gocalendar
+```
 
-	cds := sc.Calendars(2020,6,5)
-	for _,cd := range cds {
-		var jqStr string
-		if cd.SD.Jq != nil {
-			jqStr = fmt.Sprintf(" 节气:%s (定%s：%d:%d:%d)",cd.SD.Jq.Name,cd.SD.Jq.Name,cd.SD.Jq.Date.Hour,cd.SD.Jq.Date.Min,cd.SD.Jq.Date.Sec)
-		}
+## 示例 ##
 
-		b.Logf("公历:%d年%d月%d日 周%s 农历:%d(%s%s)[%s]年%s%s月%s (%s%s年%s%s月%s%s日%s%s时) %s",
-			cd.SD.Date.Year, cd.SD.Date.Month, cd.SD.Date.Day, WeekChinese(cd.SD.Date.Week),
-			cd.LD.Date.Year,cd.LD.YearGanZi.Gan,cd.LD.YearGanZi.Zhi,cd.LD.YearGanZi.Animal, cd.LD.LeapStr, cd.LD.MonthStr, cd.LD.DayStr,
-			cd.SD.GanZhi.YtgStr, cd.SD.GanZhi.YdzStr, cd.SD.GanZhi.MtgStr, cd.SD.GanZhi.MdzStr, cd.SD.GanZhi.DtgStr, cd.SD.GanZhi.DdzStr, cd.SD.GanZhi.HtgStr, cd.SD.GanZhi.HdzStr,
-			jqStr)
-	}
+### 日历表 ###
+
+#### 生成一个日历表 ####
+
+`(*Calendar) Generate()`
+
+``` go
+// 用默认的Calendar生成日历表,当前时间是2021年2月8日
+items := DefaultCalendar().Generate()
+for _,item := range items {
+	fmt.Println(item)
 }
 
 ```
 
-公历和农历测试结果显示如下：
+```
+ 公历日期(*)周        农历日期          干支           节气、节日
+------------------------------------------------------------------------
+2021-01-31 周日 2020庚子(鼠)年腊月十九 庚子年己丑月己卯日
+2021-02-01 周一 2020庚子(鼠)年腊月二十 庚子年己丑月庚辰日
+2021-02-02 周二 2020庚子(鼠)年腊月廿一 庚子年己丑月辛巳日
+2021-02-03 周三 2020庚子(鼠)年腊月廿二 辛丑年庚寅月壬午日 立春 定立春:2021-02-03T22:59:23+08:00
+2021-02-04 周四 2020庚子(鼠)年腊月廿三 辛丑年庚寅月癸未日
+2021-02-05 周五 2020庚子(鼠)年腊月廿四 辛丑年庚寅月甲申日 小年
+2021-02-06 周六 2020庚子(鼠)年腊月廿五 辛丑年庚寅月乙酉日
+2021-02-07 周日 2020庚子(鼠)年腊月廿六 辛丑年庚寅月丙戌日
+2021-02-08*周一 2020庚子(鼠)年腊月廿七 辛丑年庚寅月丁亥日
+2021-02-09 周二 2020庚子(鼠)年腊月廿八 辛丑年庚寅月戊子日
+2021-02-10 周三 2020庚子(鼠)年腊月廿九 辛丑年庚寅月己丑日
+2021-02-11 周四 2020庚子(鼠)年腊月三十 辛丑年庚寅月庚寅日 除夕
+2021-02-12 周五 2021辛丑(牛)年正月初一 辛丑年庚寅月辛卯日 春节
+2021-02-13 周六 2021辛丑(牛)年正月初二 辛丑年庚寅月壬辰日
+2021-02-14 周日 2021辛丑(牛)年正月初三 辛丑年庚寅月癸巳日 情人节
+2021-02-15 周一 2021辛丑(牛)年正月初四 辛丑年庚寅月甲午日
+2021-02-16 周二 2021辛丑(牛)年正月初五 辛丑年庚寅月乙未日
+2021-02-17 周三 2021辛丑(牛)年正月初六 辛丑年庚寅月丙申日
+2021-02-18 周四 2021辛丑(牛)年正月初七 辛丑年庚寅月丁酉日 雨水 定雨水:2021-02-18T18:44:29+08:00
+2021-02-19 周五 2021辛丑(牛)年正月初八 辛丑年庚寅月戊戌日
+2021-02-20 周六 2021辛丑(牛)年正月初九 辛丑年庚寅月己亥日
+2021-02-21 周日 2021辛丑(牛)年正月初十 辛丑年庚寅月庚子日
+2021-02-22 周一 2021辛丑(牛)年正月十一 辛丑年庚寅月辛丑日
+2021-02-23 周二 2021辛丑(牛)年正月十二 辛丑年庚寅月壬寅日
+2021-02-24 周三 2021辛丑(牛)年正月十三 辛丑年庚寅月癸卯日
+2021-02-25 周四 2021辛丑(牛)年正月十四 辛丑年庚寅月甲辰日
+2021-02-26 周五 2021辛丑(牛)年正月十五 辛丑年庚寅月乙巳日 元宵节
+2021-02-27 周六 2021辛丑(牛)年正月十六 辛丑年庚寅月丙午日
+2021-02-28 周日 2021辛丑(牛)年正月十七 辛丑年庚寅月丁未日
+2021-03-01 周一 2021辛丑(牛)年正月十八 辛丑年庚寅月戊申日
+2021-03-02 周二 2021辛丑(牛)年正月十九 辛丑年庚寅月己酉日
+2021-03-03 周三 2021辛丑(牛)年正月二十 辛丑年庚寅月庚戌日
+2021-03-04 周四 2021辛丑(牛)年正月廿一 辛丑年庚寅月辛亥日
+2021-03-05 周五 2021辛丑(牛)年正月廿二 辛丑年辛卯月壬子日 惊蛰 定惊蛰:2021-03-05T16:53:57+08:00
+2021-03-06 周六 2021辛丑(牛)年正月廿三 辛丑年辛卯月癸丑日
+2021-03-07 周日 2021辛丑(牛)年正月廿四 辛丑年辛卯月甲寅日
+2021-03-08 周一 2021辛丑(牛)年正月廿五 辛丑年辛卯月乙卯日 妇女节
+2021-03-09 周二 2021辛丑(牛)年正月廿六 辛丑年辛卯月丙辰日
+2021-03-10 周三 2021辛丑(牛)年正月廿七 辛丑年辛卯月丁巳日
+2021-03-11 周四 2021辛丑(牛)年正月廿八 辛丑年辛卯月戊午日
+2021-03-12 周五 2021辛丑(牛)年正月廿九 辛丑年辛卯月己未日 植树节
+2021-03-13 周六 2021辛丑(牛)年二月初一 辛丑年辛卯月庚申日
+```
+
+#### 指定日期的日历表 ####
+
+`(*Calendar) GenerateWithDate(year, month, day int, timeParts ...int)`
+
+``` go
+items := DefaultCalendar().GenerateWithDate(2021,5,1)
+for _,item := range items {
+	fmt.Println(item)
+}
+```
 
 ```
-goos: windows
-goarch: amd64
-pkg: github.com/liujiawm/gocalendar
-BenchmarkCalendar_Calendars-4   	1000000000	         0.00252 ns/op
---- BENCH: BenchmarkCalendar_Calendars-4
-    calendar_test.go:44: 公历:2020年6月1日 周一 农历:2020(庚子)[鼠]年闰四月初十 (庚子年辛巳月乙亥日丁亥时) 
-    calendar_test.go:44: 公历:2020年6月2日 周二 农历:2020(庚子)[鼠]年闰四月十一 (庚子年辛巳月丙子日己亥时) 
-    calendar_test.go:44: 公历:2020年6月3日 周三 农历:2020(庚子)[鼠]年闰四月十二 (庚子年辛巳月丁丑日辛亥时) 
-    calendar_test.go:44: 公历:2020年6月4日 周四 农历:2020(庚子)[鼠]年闰四月十三 (庚子年辛巳月戊寅日癸亥时) 
-    calendar_test.go:44: 公历:2020年6月5日 周五 农历:2020(庚子)[鼠]年闰四月十四 (庚子年壬午月己卯日乙亥时)  节气:芒种 (定芒种：12:57:52)
-    calendar_test.go:44: 公历:2020年6月6日 周六 农历:2020(庚子)[鼠]年闰四月十五 (庚子年壬午月庚辰日丁亥时) 
-    calendar_test.go:44: 公历:2020年6月7日 周日 农历:2020(庚子)[鼠]年闰四月十六 (庚子年壬午月辛巳日己亥时) 
-    calendar_test.go:44: 公历:2020年6月8日 周一 农历:2020(庚子)[鼠]年闰四月十七 (庚子年壬午月壬午日辛亥时) 
-    calendar_test.go:44: 公历:2020年6月9日 周二 农历:2020(庚子)[鼠]年闰四月十八 (庚子年壬午月癸未日癸亥时) 
-    calendar_test.go:44: 公历:2020年6月10日 周三 农历:2020(庚子)[鼠]年闰四月十九 (庚子年壬午月甲申日乙亥时) 
-	... [output truncated]
-PASS
+2021-04-25 周日 2021辛丑(牛)年三月十四 辛丑年壬辰月癸卯日
+2021-04-26 周一 2021辛丑(牛)年三月十五 辛丑年壬辰月甲辰日
+2021-04-27 周二 2021辛丑(牛)年三月十六 辛丑年壬辰月乙巳日
+2021-04-28 周三 2021辛丑(牛)年三月十七 辛丑年壬辰月丙午日
+2021-04-29 周四 2021辛丑(牛)年三月十八 辛丑年壬辰月丁未日
+2021-04-30 周五 2021辛丑(牛)年三月十九 辛丑年壬辰月戊申日
+2021-05-01 周六 2021辛丑(牛)年三月二十 辛丑年壬辰月己酉日 劳动节
+2021-05-02 周日 2021辛丑(牛)年三月廿一 辛丑年壬辰月庚戌日
+2021-05-03 周一 2021辛丑(牛)年三月廿二 辛丑年壬辰月辛亥日
+2021-05-04 周二 2021辛丑(牛)年三月廿三 辛丑年壬辰月壬子日 青年节
+2021-05-05 周三 2021辛丑(牛)年三月廿四 辛丑年癸巳月癸丑日 立夏 定立夏:2021-05-05T14:46:29+08:00
+2021-05-06 周四 2021辛丑(牛)年三月廿五 辛丑年癸巳月甲寅日
+2021-05-07 周五 2021辛丑(牛)年三月廿六 辛丑年癸巳月乙卯日
+2021-05-08 周六 2021辛丑(牛)年三月廿七 辛丑年癸巳月丙辰日
+2021-05-09 周日 2021辛丑(牛)年三月廿八 辛丑年癸巳月丁巳日 母亲节
+2021-05-10 周一 2021辛丑(牛)年三月廿九 辛丑年癸巳月戊午日
+2021-05-11 周二 2021辛丑(牛)年三月三十 辛丑年癸巳月己未日
+2021-05-12 周三 2021辛丑(牛)年四月初一 辛丑年癸巳月庚申日 护士节
+2021-05-13 周四 2021辛丑(牛)年四月初二 辛丑年癸巳月辛酉日
+2021-05-14 周五 2021辛丑(牛)年四月初三 辛丑年癸巳月壬戌日
+2021-05-15 周六 2021辛丑(牛)年四月初四 辛丑年癸巳月癸亥日
+2021-05-16 周日 2021辛丑(牛)年四月初五 辛丑年癸巳月甲子日
+2021-05-17 周一 2021辛丑(牛)年四月初六 辛丑年癸巳月乙丑日
+2021-05-18 周二 2021辛丑(牛)年四月初七 辛丑年癸巳月丙寅日
+2021-05-19 周三 2021辛丑(牛)年四月初八 辛丑年癸巳月丁卯日
+2021-05-20 周四 2021辛丑(牛)年四月初九 辛丑年癸巳月戊辰日
+2021-05-21 周五 2021辛丑(牛)年四月初十 辛丑年癸巳月己巳日 小满 定小满:2021-05-21T03:36:22+08:00
+2021-05-22 周六 2021辛丑(牛)年四月十一 辛丑年癸巳月庚午日
+2021-05-23 周日 2021辛丑(牛)年四月十二 辛丑年癸巳月辛未日
+2021-05-24 周一 2021辛丑(牛)年四月十三 辛丑年癸巳月壬申日
+2021-05-25 周二 2021辛丑(牛)年四月十四 辛丑年癸巳月癸酉日
+2021-05-26 周三 2021辛丑(牛)年四月十五 辛丑年癸巳月甲戌日
+2021-05-27 周四 2021辛丑(牛)年四月十六 辛丑年癸巳月乙亥日
+2021-05-28 周五 2021辛丑(牛)年四月十七 辛丑年癸巳月丙子日
+2021-05-29 周六 2021辛丑(牛)年四月十八 辛丑年癸巳月丁丑日
+2021-05-30 周日 2021辛丑(牛)年四月十九 辛丑年癸巳月戊寅日
+2021-05-31 周一 2021辛丑(牛)年四月二十 辛丑年癸巳月己卯日
+2021-06-01 周二 2021辛丑(牛)年四月廿一 辛丑年癸巳月庚辰日 儿童节
+2021-06-02 周三 2021辛丑(牛)年四月廿二 辛丑年癸巳月辛巳日
+2021-06-03 周四 2021辛丑(牛)年四月廿三 辛丑年癸巳月壬午日
+2021-06-04 周五 2021辛丑(牛)年四月廿四 辛丑年癸巳月癸未日
+2021-06-05 周六 2021辛丑(牛)年四月廿五 辛丑年甲午月甲申日 芒种 定芒种:2021-06-05T18:51:32+08:00
+```
+
+#### 日历变换 ####
+
+下一月
+
+`(*Calendar) NextMonth`
+
+``` go
+c := DefaultCalendar()
+
+// 下一月的日历表
+items := c.NextMonth()
 
 ```
 
-## 日历:公历
+上一月
+
+`(*Calendar) PreviousMonth`
+
+``` go
+c := DefaultCalendar()
+
+// 上一月的日历表
+items := c.PreviousMonth()
+
 ```
-func TestCalendar_SolarCalendar(t *testing.T) {
-	// 默认设置 DefaultCalendar()
-	datas2 := DefaultCalendar().SolarCalendar(2020,12,31)
-	if datas2 != nil {
-		for _,d := range datas2 {
-			var jqstr string
-			if d.Jq != nil {
-				jqstr = fmt.Sprintf(" 节气:%s (定%s：%d:%d:%d) \n",d.Jq.Name,d.Jq.Name,d.Jq.Date.Hour,d.Jq.Date.Min,d.Jq.Date.Sec)
-			}
-			t.Logf("%d年%d月%d日 %d时%d分%d秒 周%d (%s%s年%s%s月%s%s日%s%s时) %s",d.Year,d.Month,d.Day,d.Hour,d.Min,d.Sec,d.Week,
-				d.GanZhi.YtgStr, d.GanZhi.YdzStr, d.GanZhi.MtgStr, d.GanZhi.MdzStr, d.GanZhi.DtgStr, d.GanZhi.DdzStr, d.GanZhi.HtgStr, d.GanZhi.HdzStr,
-				jqstr)
-		}
-	}
+
+下一年当月
+
+`(*Calendar) NextYear`
+
+``` go
+c := DefaultCalendar()
+
+// 下一年当月的日历表
+items := c.NextYear()
+
+```
+
+上一年当月
+
+`(*Calendar) PreviousYear`
+
+``` go
+c := DefaultCalendar()
+
+// 上一年的当月日历表
+items := c.PreviousYear()
+
+```
+
+### 日历配置 ###
+
+``` go
+type CalendarConfig struct {
+	Grid            int    // 取日历方式,GridDay按天取日历,GridWeek按周取日历,GridMonth按月取日历
+	FirstWeek       int    // 日历显示时第一列显示周几，(日历表第一列是周几,0周日,依次最大值6)
+	TimeZoneName    string // 时区名称,需php支持的时区名称
+	SolarTerms      bool   // 读取节气 bool
+	Lunar           bool   // 读取农历 bool
+	HeavenlyEarthly bool   // 读取干支 bool
+	NightZiHour     bool   // 区分早晚子时，true则 23:00-24:00 00:00-01:00为子时，否则00:00-02:00为子时
+	StarSign        bool   // 读取星座
 }
 
 ```
 
-公历测试结果显示如下:
+#### 自定义日历 ####
 
-```
-=== RUN   TestCalendar_SolarCalendar
---- PASS: TestCalendar_SolarCalendar (0.02s)
-    calendar_test.go:61: 2020年11月29日 21时14分39秒 周0 (庚子年丁亥月丙子日己亥时) 
-    calendar_test.go:61: 2020年11月30日 21时14分39秒 周1 (庚子年丁亥月丁丑日辛亥时) 
-    calendar_test.go:61: 2020年12月1日 21时14分39秒 周2 (庚子年丁亥月戊寅日癸亥时) 
-    calendar_test.go:61: 2020年12月2日 21时14分39秒 周3 (庚子年丁亥月己卯日乙亥时) 
-    calendar_test.go:61: 2020年12月3日 21时14分39秒 周4 (庚子年丁亥月庚辰日丁亥时) 
-    calendar_test.go:61: 2020年12月4日 21时14分39秒 周5 (庚子年丁亥月辛巳日己亥时) 
-    calendar_test.go:61: 2020年12月5日 21时14分39秒 周6 (庚子年丁亥月壬午日辛亥时) 
-    calendar_test.go:61: 2020年12月6日 21时14分39秒 周0 (庚子年丁亥月癸未日癸亥时) 
-    calendar_test.go:61: 2020年12月7日 21时14分39秒 周1 (庚子年戊子月甲申日乙亥时)  节气:大雪 (定大雪：0:9:23) 
-    calendar_test.go:61: 2020年12月8日 21时14分39秒 周2 (庚子年戊子月乙酉日丁亥时) 
-    calendar_test.go:61: 2020年12月9日 21时14分39秒 周3 (庚子年戊子月丙戌日己亥时) 
-    calendar_test.go:61: 2020年12月10日 21时14分39秒 周4 (庚子年戊子月丁亥日辛亥时) 
-    calendar_test.go:61: 2020年12月11日 21时14分39秒 周5 (庚子年戊子月戊子日癸亥时) 
-    calendar_test.go:61: 2020年12月12日 21时14分39秒 周6 (庚子年戊子月己丑日乙亥时) 
-    calendar_test.go:61: 2020年12月13日 21时14分39秒 周0 (庚子年戊子月庚寅日丁亥时) 
-    calendar_test.go:61: 2020年12月14日 21时14分39秒 周1 (庚子年戊子月辛卯日己亥时) 
-    calendar_test.go:61: 2020年12月15日 21时14分39秒 周2 (庚子年戊子月壬辰日辛亥时) 
-    calendar_test.go:61: 2020年12月16日 21时14分39秒 周3 (庚子年戊子月癸巳日癸亥时) 
-    calendar_test.go:61: 2020年12月17日 21时14分39秒 周4 (庚子年戊子月甲午日乙亥时) 
-    calendar_test.go:61: 2020年12月18日 21时14分39秒 周5 (庚子年戊子月乙未日丁亥时) 
-    calendar_test.go:61: 2020年12月19日 21时14分39秒 周6 (庚子年戊子月丙申日己亥时) 
-    calendar_test.go:61: 2020年12月20日 21时14分39秒 周0 (庚子年戊子月丁酉日辛亥时) 
-    calendar_test.go:61: 2020年12月21日 21时14分39秒 周1 (庚子年戊子月戊戌日癸亥时)  节气:冬至 (定冬至：18:2:36) 
-    calendar_test.go:61: 2020年12月22日 21时14分39秒 周2 (庚子年戊子月己亥日乙亥时) 
-    calendar_test.go:61: 2020年12月23日 21时14分39秒 周3 (庚子年戊子月庚子日丁亥时) 
-    calendar_test.go:61: 2020年12月24日 21时14分39秒 周4 (庚子年戊子月辛丑日己亥时) 
-    calendar_test.go:61: 2020年12月25日 21时14分39秒 周5 (庚子年戊子月壬寅日辛亥时) 
-    calendar_test.go:61: 2020年12月26日 21时14分39秒 周6 (庚子年戊子月癸卯日癸亥时) 
-    calendar_test.go:61: 2020年12月27日 21时14分39秒 周0 (庚子年戊子月甲辰日乙亥时) 
-    calendar_test.go:61: 2020年12月28日 21时14分39秒 周1 (庚子年戊子月乙巳日丁亥时) 
-    calendar_test.go:61: 2020年12月29日 21时14分39秒 周2 (庚子年戊子月丙午日己亥时) 
-    calendar_test.go:61: 2020年12月30日 21时14分39秒 周3 (庚子年戊子月丁未日辛亥时) 
-    calendar_test.go:61: 2020年12月31日 21时14分39秒 周4 (庚子年戊子月戊申日癸亥时) 
-    calendar_test.go:61: 2021年1月1日 21时14分39秒 周5 (庚子年戊子月己酉日乙亥时) 
-    calendar_test.go:61: 2021年1月2日 21时14分39秒 周6 (庚子年戊子月庚戌日丁亥时) 
-    calendar_test.go:61: 2021年1月3日 21时14分39秒 周0 (庚子年戊子月辛亥日己亥时) 
-    calendar_test.go:61: 2021年1月4日 21时14分39秒 周1 (庚子年戊子月壬子日辛亥时) 
-    calendar_test.go:61: 2021年1月5日 21时14分39秒 周2 (庚子年己丑月癸丑日癸亥时)  节气:小寒 (定小寒：11:23:50) 
-    calendar_test.go:61: 2021年1月6日 21时14分39秒 周3 (庚子年己丑月甲寅日乙亥时) 
-    calendar_test.go:61: 2021年1月7日 21时14分39秒 周4 (庚子年己丑月乙卯日丁亥时) 
-    calendar_test.go:61: 2021年1月8日 21时14分39秒 周5 (庚子年己丑月丙辰日己亥时) 
-    calendar_test.go:61: 2021年1月9日 21时14分39秒 周6 (庚子年己丑月丁巳日辛亥时) 
-PASS
+`NewCalendar(CalendarConfig)`
 
-```
+``` go
+c := NewCalendar(CalendarConfig{
+		Grid:GridWeek,
+		FirstWeek:0,
+		SolarTerms:true,
+		Lunar:true,
+		HeavenlyEarthly:true,
+		NightZiHour:true,
+		StarSign:true,
+	})
 
-# JSON
-
-```
-	sc := Calendar{
-		Loc:       time.Local, // 时区,默认time.Local
-		FirstWeek: 0,          // 从周几天始,默认0周日开始, (日历表第列是周几,0周日,依次最大值6)
-		Grid:      GridWeek,  // 取日历方式,默认取一个月, gocalendar.GridDay取一天,gocalendar.GridWeek 取一周,gocalendar.GridMonth取一个月
-		Zwz:       false,      // 是否区分早晚子时(子时从23-01时),true则23:00-24:00算成上一天
-		Getjq:     true,       // 是否取节气
-	}
-	cds := sc.Calendars(2020,4,22)
-	cdjson,err := json.Marshal(cds)
-	if err != nil {
-		t.Error("JSON ERR:", err.Error())
-	}
-	t.Logf(string(cdjson))
-
-```
-
-结果:
-
-```
-
-[{"solar":{"date":{"year":2020,"month":4,"day":19,"hour":22,"min":1,"sec":22,"week":0},"jq":{"name":"谷雨","date":{"year":2020,"month":4,"day":19,"hour":22,"min":45,"sec":11,"week":0}},"gan_zhi":{"ytg":6,"ytg_str":"庚","ydz":0,"ydz_str":"子","mtg":6,"mtg_str":"庚","mdz":4,"mdz_str":"辰","dtg":8,"dtg_str":"壬","ddz":4,"ddz_str":"辰","htg":7,"htg_str":"辛","hdz":11,"hdz_str":"亥"}},"lunar":{"date":{"year":2020,"month":3,"day":27,"hour":22,"min":1,"sec":22,"week":0},"month_str":"三","day_str":"廿七","leap_str":"","leap_year":4,"leap_month":0,"gan_zi":{"gan":"庚","zhi":"子","animal":"鼠"}}},{"solar":{"date":{"year":2020,"month":4,"day":20,"hour":22,"min":1,"sec":22,"week":1},"jq":null,"gan_zhi":{"ytg":6,"ytg_str":"庚","ydz":0,"ydz_str":"子","mtg":6,"mtg_str":"庚","mdz":4,"mdz_str":"辰","dtg":9,"dtg_str":"癸","ddz":5,"ddz_str":"巳","htg":9,"htg_str":"癸","hdz":11,"hdz_str":"亥"}},"lunar":{"date":{"year":2020,"month":3,"day":28,"hour":22,"min":1,"sec":22,"week":1},"month_str":"三","day_str":"廿八","leap_str":"","leap_year":4,"leap_month":0,"gan_zi":{"gan":"庚","zhi":"子","animal":"鼠"}}},{"solar":{"date":{"year":2020,"month":4,"day":21,"hour":22,"min":1,"sec":22,"week":2},"jq":null,"gan_zhi":{"ytg":6,"ytg_str":"庚","ydz":0,"ydz_str":"子","mtg":6,"mtg_str":"庚","mdz":4,"mdz_str":"辰","dtg":0,"dtg_str":"甲","ddz":6,"ddz_str":"午","htg":1,"htg_str":"乙","hdz":11,"hdz_str":"亥"}},"lunar":{"date":{"year":2020,"month":3,"day":29,"hour":22,"min":1,"sec":22,"week":2},"month_str":"三","day_str":"廿九","leap_str":"","leap_year":4,"leap_month":0,"gan_zi":{"gan":"庚","zhi":"子","animal":"鼠"}}},{"solar":{"date":{"year":2020,"month":4,"day":22,"hour":22,"min":1,"sec":22,"week":3},"jq":null,"gan_zhi":{"ytg":6,"ytg_str":"庚","ydz":0,"ydz_str":"子","mtg":6,"mtg_str":"庚","mdz":4,"mdz_str":"辰","dtg":1,"dtg_str":"乙","ddz":7,"ddz_str":"未","htg":3,"htg_str":"丁","hdz":11,"hdz_str":"亥"}},"lunar":{"date":{"year":2020,"month":3,"day":30,"hour":22,"min":1,"sec":22,"week":3},"month_str":"三","day_str":"卅十","leap_str":"","leap_year":4,"leap_month":0,"gan_zi":{"gan":"庚","zhi":"子","animal":"鼠"}}},{"solar":{"date":{"year":2020,"month":4,"day":23,"hour":22,"min":1,"sec":22,"week":4},"jq":null,"gan_zhi":{"ytg":6,"ytg_str":"庚","ydz":0,"ydz_str":"子","mtg":6,"mtg_str":"庚","mdz":4,"mdz_str":"辰","dtg":2,"dtg_str":"丙","ddz":8,"ddz_str":"申","htg":5,"htg_str":"己","hdz":11,"hdz_str":"亥"}},"lunar":{"date":{"year":2020,"month":4,"day":1,"hour":22,"min":1,"sec":22,"week":4},"month_str":"四","day_str":"初一","leap_str":"","leap_year":4,"leap_month":0,"gan_zi":{"gan":"庚","zhi":"子","animal":"鼠"}}},{"solar":{"date":{"year":2020,"month":4,"day":24,"hour":22,"min":1,"sec":22,"week":5},"jq":null,"gan_zhi":{"ytg":6,"ytg_str":"庚","ydz":0,"ydz_str":"子","mtg":6,"mtg_str":"庚","mdz":4,"mdz_str":"辰","dtg":3,"dtg_str":"丁","ddz":9,"ddz_str":"酉","htg":7,"htg_str":"辛","hdz":11,"hdz_str":"亥"}},"lunar":{"date":{"year":2020,"month":4,"day":2,"hour":22,"min":1,"sec":22,"week":5},"month_str":"四","day_str":"初二","leap_str":"","leap_year":4,"leap_month":0,"gan_zi":{"gan":"庚","zhi":"子","animal":"鼠"}}},{"solar":{"date":{"year":2020,"month":4,"day":25,"hour":22,"min":1,"sec":22,"week":6},"jq":null,"gan_zhi":{"ytg":6,"ytg_str":"庚","ydz":0,"ydz_str":"子","mtg":6,"mtg_str":"庚","mdz":4,"mdz_str":"辰","dtg":4,"dtg_str":"戊","ddz":10,"ddz_str":"戌","htg":9,"htg_str":"癸","hdz":11,"hdz_str":"亥"}},"lunar":{"date":{"year":2020,"month":4,"day":3,"hour":22,"min":1,"sec":22,"week":6},"month_str":"四","day_str":"初三","leap_str":"","leap_year":4,"leap_month":0,"gan_zi":{"gan":"庚","zhi":"子","animal":"鼠"}}}]
-
-```
-
-
-# 取节气
-
-```
-func TestCalendar_Jieqi(t *testing.T) {
-	jq,_,err := DefaultCalendar().Jieqi(2020)
-	if err != nil {
-		t.Error(err.Error())
-	}
-	for _,d := range jq {
-		t.Logf("%s - %d年%d月%d日 %d时%d分%d秒 周%d",d.Name,d.Date.Year,d.Date.Month,d.Date.Day,d.Date.Hour,d.Date.Min,d.Date.Sec,d.Date.Week)
-	}
+items :=c.GenerateWithDate(2021,12,22)
+for _,item := range result {
+	fmt.Println(item)
 }
 
 ```
 
-节气结果如下:
-
+```
+2021-12-19 周日 2021辛丑(牛)年十一月十六 辛丑年庚子月辛丑日
+2021-12-20 周一 2021辛丑(牛)年十一月十七 辛丑年庚子月壬寅日
+2021-12-21 周二 2021辛丑(牛)年十一月十八 辛丑年庚子月癸卯日 冬至 定冬至:2021-12-21T23:59:05+08:00
+2021-12-22 周三 2021辛丑(牛)年十一月十九 辛丑年庚子月甲辰日
+2021-12-23 周四 2021辛丑(牛)年十一月二十 辛丑年庚子月乙巳日
+2021-12-24 周五 2021辛丑(牛)年十一月廿一 辛丑年庚子月丙午日
+2021-12-25 周六 2021辛丑(牛)年十一月廿二 辛丑年庚子月丁未日 圣诞节
 ```
 
-=== RUN   TestCalendar_Jieqi
---- PASS: TestCalendar_Jieqi (0.01s)
-    calendar_test.go:86: 冬至 - 2019年12月22日 12时19分6秒 周0
-    calendar_test.go:86: 小寒 - 2020年1月6日 5时30分6秒 周1
-    calendar_test.go:86: 大寒 - 2020年1月20日 22时54分52秒 周1
-    calendar_test.go:86: 立春 - 2020年2月4日 17时3分44秒 周2
-    calendar_test.go:86: 雨水 - 2020年2月19日 12时57分27秒 周3
-    calendar_test.go:86: 惊蛰 - 2020年3月5日 10时57分22秒 周4
-    calendar_test.go:86: 春分 - 2020年3月20日 11时49分57秒 周5
-    calendar_test.go:86: 清明 - 2020年4月4日 15时38分19秒 周6
-    calendar_test.go:86: 谷雨 - 2020年4月19日 22时45分11秒 周0
-    calendar_test.go:86: 立夏 - 2020年5月5日 8时50分58秒 周2
-    calendar_test.go:86: 小满 - 2020年5月20日 21时48分35秒 周3
-    calendar_test.go:86: 芒种 - 2020年6月5日 12时57分52秒 周5
-    calendar_test.go:86: 夏至 - 2020年6月21日 5时43分16秒 周0
-    calendar_test.go:86: 小暑 - 2020年7月6日 23时14分34秒 周1
-    calendar_test.go:86: 大暑 - 2020年7月22日 16时37分21秒 周3
-    calendar_test.go:86: 立秋 - 2020年8月7日 9时6分52秒 周5
-    calendar_test.go:86: 处暑 - 2020年8月22日 23时45分38秒 周6
-    calendar_test.go:86: 白露 - 2020年9月7日 12时8分26秒 周1
-    calendar_test.go:86: 秋分 - 2020年9月22日 21时30分52秒 周2
-    calendar_test.go:86: 寒露 - 2020年10月8日 3时55分2秒 周4
-    calendar_test.go:86: 霜降 - 2020年10月23日 6时59分18秒 周5
-    calendar_test.go:86: 立冬 - 2020年11月7日 7时13分27秒 周6
-    calendar_test.go:86: 小雪 - 2020年11月22日 4时39分32秒 周0
-    calendar_test.go:86: 大雪 - 2020年12月7日 0时9分23秒 周1
-    calendar_test.go:86: 冬至 - 2020年12月21日 18时2分36秒 周1
-    calendar_test.go:86: 小寒 - 2021年1月5日 11时23分50秒 周2
-    calendar_test.go:86: 大寒 - 2021年1月20日 4时40分31秒 周3
-PASS
+#### 其它接口 ####
 
-```
+#### 节气 ####
 
-# 公历农历互换
+> 注意：节气依春分点计算，不同时区因时差不同，定节气时间也会不同
 
-```
+全年节气
 
-func TestCalendar_Solar2Lunar(t *testing.T) {
-	sc := Calendar{
-		Getjq:     false,       // 是否取节气
-	}
+`(*Calendar) SolarTerms(year int) []*SolarTerm`
 
-	d := YmdNewDate(2020,5,28,time.Local)
-	ld,err := sc.Solar2Lunar(sc.DateToSolarDate(d))
-	if err != nil {
-		t.Error(err)
-	}
+``` go
+// c := DefaultCalendar()
 
-	t.Logf("公历%d年%d月%d日转成农历是: %d(%s%s)[%s]年%s%s月%s",d.Year,d.Month,d.Day,ld.Year,ld.YearGanZi.Gan,ld.YearGanZi.Zhi,ld.YearGanZi.Animal, ld.LeapStr, ld.MonthStr, ld.DayStr)
-
-	ssd,err := sc.Lunar2Solar(ld.Year,ld.Month,ld.Day,ld.LeapMonth)
-	if err != nil {
-		t.Error(err)
-	}
-	t.Logf("农历%d年%d月%d日转成公历是: %d年%d月%d日",ld.Year,ld.Month,ld.Day,ssd.Year,ssd.Month,ssd.Day)
-
-}
-
-
-```
-
-结果:
-
-```
-=== RUN   TestCalendar_Solar2Lunar
---- PASS: TestCalendar_Solar2Lunar (0.02s)
-    calendar_test.go:93: 公历2020年5月28日转成农历是: 2020(庚子)[鼠]年闰四月初六
-    calendar_test.go:99: 农历2020年4月6日转成公历是: 2020年5月28日
-PASS
-
-```
-
-# 星座
-
-```
-func TestZodiac(t *testing.T) {
-	// 用日期的月和日取出对应的星座索引和名称
-	i,zo := Zodiac(4,22)
-	t.Log(i)
-	t.Log(zo)
+// 该package默认为本地时区，如自定议时区 Asia/Shanghai ,这将按中国时区计算节气
+c := NewCalendar(CalendarConfig{TimeZoneName:"Asia/Shanghai"})
+sts:= c.SolarTerms(2021)
+fmt.Println("2021年节气:")
+for _,v := range sts{
+	fmt.Printf(" %s 定%s:%s \n", v.Name, v.Name, v.Time.Format(time.RFC3339))
 }
 
 ```
 
-结果
+```
+2021年节气:
+ 冬至 定冬至:2020-12-21T18:02:36+08:00 
+ 小寒 定小寒:2021-01-05T11:23:50+08:00 
+ 大寒 定大寒:2021-01-20T04:40:31+08:00 
+ 立春 定立春:2021-02-03T22:59:23+08:00 
+ 雨水 定雨水:2021-02-18T18:44:29+08:00 
+ 惊蛰 定惊蛰:2021-03-05T16:53:57+08:00 
+ 春分 定春分:2021-03-20T17:37:28+08:00 
+ 清明 定清明:2021-04-04T21:34:48+08:00 
+ 谷雨 定谷雨:2021-04-20T04:32:43+08:00 
+ 立夏 定立夏:2021-05-05T14:46:29+08:00 
+ 小满 定小满:2021-05-21T03:36:22+08:00 
+ 芒种 定芒种:2021-06-05T18:51:32+08:00 
+ 夏至 定夏至:2021-06-21T11:31:47+08:00 
+ 小暑 定小暑:2021-07-07T05:05:28+08:00 
+ 大暑 定大暑:2021-07-22T22:26:42+08:00 
+ 立秋 定立秋:2021-08-07T14:54:28+08:00 
+ 处暑 定处暑:2021-08-23T05:35:23+08:00 
+ 白露 定白露:2021-09-07T17:53:16+08:00 
+ 秋分 定秋分:2021-09-23T03:20:56+08:00 
+ 寒露 定寒露:2021-10-08T09:38:45+08:00 
+ 霜降 定霜降:2021-10-23T12:50:30+08:00 
+ 立冬 定立冬:2021-11-07T12:58:14+08:00 
+ 小雪 定小雪:2021-11-22T10:33:05+08:00 
+ 大雪 定大雪:2021-12-07T05:56:49+08:00 
+ 冬至 定冬至:2021-12-21T23:59:05+08:00 
+ 小寒 定小寒:2022-01-05T17:14:07+08:00 
+```
+
+#### 农历与公历互换 ####
+
+> 农历以中国(东八区)时区对应公历
+
+公历转农历
+
+`(*Calendar) GregorianToLunar(year, month, day int) LunarDate`
+
+``` go
+ld := DefaultCalendar().GregorianToLunar(2020,6,5)
+fmt.Printf("%d%s%s(%s)年%s%s月%s\n",ld.Year,ld.YearGZ.HSN,ld.YearGZ.EBN,ld.AnimalName,ld.LeapStr,ld.MonthName,ld.DayName)
 
 ```
---- PASS: TestZodiac (0.00s)
-    calendar_test.go:107: 3
-    calendar_test.go:108: 金牛
-PASS
 
+```
+2020庚子(鼠)年闰四月十四
+```
+
+农历转公历
+
+`(*Calendar) LunarToGregorian(lunarYear,lunarMonth,lunarDay int, isLeap bool) (time.Time, error)`
+
+``` go
+c := DefaultCalendar()
+gd,_ := c.LunarToGregorian(2020,4,14,false)
+fmt.Println("农历2020年四月十四转换成公历是:", gd.Format("2006-01-02"))
+
+gd,_ = c.LunarToGregorian(2020,4,14,true)
+fmt.Println("农历2020年闰四月十四转换成公历是:", gd.Format("2006-01-02"))
+
+```
+
+```
+农历2020年四月十四转换成公历是: 2020-05-06
+农历2020年闰四月十四转换成公历是: 2020-06-05
+```
+
+#### 早晚子时示例说明 ####
+
+干支四柱的子时是23:00-00:00 00:00-01:00 说明每日开始是从上一日的23点开始
+
+我们在该日历中引进早晚子时，允许把子时分成晚子时和早子时
+
+如果不区分早晚子时，每日将依23点划分，如果区分早晚子时，则依0点划分
+
+看早晚子时区分的结果
+
+``` go
+// NightZiHour:false 不区分早晚子时
+c := NewCalendar(CalendarConfig{NightZiHour:false})
+rt := time.Date(2021,5,6,23,50,0,0,time.Local)
+gz := c.ChineseSexagenaryCycle(rt)
+fmt.Printf("%s%s年%s%s月(%s%s日)%s%s时\n", gz.Year.HSN, gz.Year.EBN, gz.Month.HSN, gz.Month.EBN, gz.Day.HSN, gz.Day.EBN, gz.Hour.HSN, gz.Hour.EBN)
+
+// NightZiHour:true 区分早晚子时
+c = NewCalendar(CalendarConfig{NightZiHour:true})
+rt = time.Date(2021,5,6,23,50,0,0,time.Local)
+gz = c.ChineseSexagenaryCycle(rt)
+fmt.Printf("%s%s年%s%s月(%s%s日)%s%s时\n", gz.Year.HSN, gz.Year.EBN, gz.Month.HSN, gz.Month.EBN, gz.Day.HSN, gz.Day.EBN, gz.Hour.HSN, gz.Hour.EBN)
+
+```
+
+> 结果中括号内有不同，该结果只在23点至00点会有所表现
+
+```
+辛丑年癸巳月(乙卯日)丙子时
+辛丑年癸巳月(甲寅日)丙子时
+```
+
+#### 公历转换干支 ####
+
+> 四柱干支以中国(东八区)时区对应公历
+
+`(*Calendar) ChineseSexagenaryCycle(time.Time)GZ{}` 日期时间对应的干支
+
+``` go
+rt := time.Date(2021,5,6,23,50,0,0,time.Local)
+gz := DefaultCalendar().ChineseSexagenaryCycle(rt)
+fmt.Printf("%s%s年%s%s月%s%s日%s%s时\n", gz.Year.HSN, gz.Year.EBN, gz.Month.HSN, gz.Month.EBN, gz.Day.HSN, gz.Day.EBN, gz.Hour.HSN, gz.Hour.EBN)
+```
+
+```
+辛丑年癸巳月甲寅日丙子时
+```
+
+#### 星座 ####
+
+`StarSign(month,day int)(int, string, error)`
+
+``` go
+// i,ss,err := StarSign(5,6)
+
+i,ss,_ := StarSign(5,6)
+fmt.Println(ss)
+// 金牛
+```
+
+#### 儒略日(Julian Day) ####
+
+日期时间转儒略日
+
+`JulianDay(year, month, day float64, timeParts ...float64) float64`
+
+``` go
+jd := JulianDay(2021,12,6)
+// 2459554.5
+
+jd = JulianDay(2021,12,6,12)
+// 2459555
+
+jd = JulianDay(2021,12,6,12,10,10)
+// 2459555.007060185
+```
+
+儒略日转日期时间
+
+方法一:`JdToTimeMap(jd float64) map[string]int` 返回一个日期时间map
+
+方法二:`JdToTime(jd float64, loc *time.Location) time.Time` 返回time.Time
+
+``` go
+datetime := JdToTimeMap(2459554.5)
+fmt.Printf("%d年%d月%d日\n",datetime["year"], datetime["month"],datetime["day"])
+// 2021年12月6日
+
+datetime = JdToTimeMap(2459555)
+fmt.Printf("%d年%d月%d日%d时\n",datetime["year"], datetime["month"],datetime["day"],datetime["hour"])
+// 2021年12月6日12时
+
+datetime = JdToTimeMap(2459555.007060185)
+fmt.Printf("%d年%d月%d日%d时%d分%d秒\n",datetime["year"], datetime["month"],datetime["day"],datetime["hour"],datetime["minute"],datetime["second"])
+// 2021年12月6日12时10分10秒
+
+// 方法二
+// datetime := JdToTime(2459555.007060185,nil)
+datetime := JdToTime(2459555.007060185,time.Local)
+fmt.Println(datetime.Format(time.RFC3339))
+// 2021-12-06T20:10:10+08:00
+```
+
+#### Modified Julian Day ####
+
+`Mjd(year, month, day float64, timeParts ...float64) float64`
+
+``` go
+mjd := Mjd(2021,12,6)
+// 59554
+
+mjd = Mjd(2021,12,6,12)
+// 59554.5
+
+mjd = Mjd(2021,12,6,12,10,10)
+// 59554.5070601851
+
+```
+
+`MjdToTimeMap(mjd float64) map[string]int`
+
+``` go
+datetime := MjdToTimeMap(59554)
+fmt.Printf("%d年%d月%d日\n",datetime["year"], datetime["month"],datetime["day"])
+// 2021年12月6日
+
+datetime = MjdToTimeMap(59554.5)
+fmt.Printf("%d年%d月%d日%d时\n",datetime["year"], datetime["month"],datetime["day"],datetime["hour"])
+// 2021年12月6日12时
+
+datetime = MjdToTimeMap(59554.507060185075)
+fmt.Printf("%d年%d月%d日%d时%d分%d秒\n",datetime["year"], datetime["month"],datetime["day"],datetime["hour"],datetime["minute"],datetime["second"])
+// 2021年12月6日12时10分10秒
 ```
