@@ -102,9 +102,6 @@ type Calendar struct {
 var (
 	lunarLeapString = "闰" // 农历闰月标志
 
-	// 中文数字
-	numberArray = [11]string{"日", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十"}
-
 	// 星期
 	weekNameArray = [7]string{"日", "一", "二", "三", "四", "五", "六"}
 
@@ -735,8 +732,8 @@ func StarSign(month, day int) (int, string, error) {
 }
 
 // (SolarTermItem) String 节气显示
-func (st SolarTermItem) String() string {
-	return fmt.Sprintf("%s 定%s:%s", st.Name, st.Name, st.Time.Format(time.RFC3339))
+func (sti SolarTermItem) String() string {
+	return fmt.Sprintf("%s 定%s:%s", sti.Name, sti.Name, sti.Time.Format(time.RFC3339))
 }
 
 // (CalendarItem) String 日历单元显示

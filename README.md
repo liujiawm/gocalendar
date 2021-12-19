@@ -8,6 +8,8 @@ calendar、日历、中国农历、阴历、节气、干支、生肖、星座
 
 当前稳定版本：v1.1.0
 
+推荐版本(Recommended Version):v1.1.0
+
 `go get github.com/liujiawm/gocalendar@v1.1.0`
 
 - [Installation 安装](#installation-安装)
@@ -20,8 +22,8 @@ calendar、日历、中国农历、阴历、节气、干支、生肖、星座
     - [早晚子时示例说明](#早晚子时示例说明)
     - [公历转换干支](#公历转换干支)
     - [星座](#星座)
-    - [儒略日(Julian Day)](#儒略日(Julian-Day))
-    - [Modified Julian Day](#Modified-Julian-Day)
+    - [儒略日(Julian Day)](#儒略日julian-day)
+    - [Modified Julian Day](#modified-julian-day)
 - [Documentation 更多详细说明](https://pkg.go.dev/github.com/liujiawm/gocalendar)
 - [帮助](https://github.com/liujiawm/gocalendar)
 - 联系
