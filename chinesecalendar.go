@@ -383,13 +383,12 @@ func (c *Calendar) LunarToGregorian(lunarYear,lunarMonth,lunarDay int, isLeap bo
 		ld.YearLeapMonth = lunarMonth
 	}
 
-	t,err := c.lunarToGregorian(ld)
-
-	return t,err
+	return c.lunarToGregorian(ld)
 }
 
 // (*Calendar) lunarToGregorian 农历转公历
 func (c *Calendar) lunarToGregorian(ld LunarDate) (time.Time, error){
+
 	lunarYear,lunarMonth,lunarDay := ld.Year, ld.Month, ld.Day
 
 	isLeap := false

@@ -17,7 +17,7 @@ const (
 type CalendarConfig struct {
 	Grid            int    // 取日历方式,GridDay按天取日历,GridWeek按周取日历,GridMonth按月取日历
 	FirstWeek       int    // 日历显示时第一列显示周几，(日历表第一列是周几,0周日,依次最大值6)
-	TimeZoneName    string // 时区名称,需php支持的时区名称
+	TimeZoneName    string // 时区名称,需zoneinfo支持的时区名称
 	SolarTerms      bool   // 读取节气 bool
 	Lunar           bool   // 读取农历 bool
 	HeavenlyEarthly bool   // 读取干支 bool

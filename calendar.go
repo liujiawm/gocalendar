@@ -19,7 +19,7 @@ import (
 )
 
 const Author = "liujiawm@gmail.com"
-const Version = "1.1.1.211217_beta"
+const Version = "1.1.1.211225_beta"
 
 // type SolarTermItem struct 节气
 type SolarTermItem struct {
@@ -188,10 +188,7 @@ func NewCalendar(cfg CalendarConfig) *Calendar {
 // 该方法返回的*Calendar是清除与rawTime相关值的c *Calendar,这样做是为了支持链接使用,
 // 因此该方法必需在相关取值之前使用
 func (c *Calendar) SetRawTime(year, month, day int, timeParts ...int) *Calendar {
-	var hour = 0
-	var minute = 0
-	var second = 0
-	var millisecond = 0
+	var hour, minute,second, millisecond = 0, 0, 0, 0
 	for timeIndex, timePart := range timeParts {
 		switch timeIndex {
 		case 0:
@@ -414,7 +411,7 @@ func (c *Calendar) createItem(t time.Time, currentYear, currentMonth int) *Calen
 	item.Time = &t
 
 	var wg = sync.WaitGroup{}
-	wg.Add(7)
+	wg.Add(7) // 在修改时要注意这里定义goroutine次数
 
 	// 是否非本月的日期,0是本月日期,-1为上一月日期,1为下一月日期
 	go func() {

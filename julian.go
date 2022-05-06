@@ -40,10 +40,7 @@ const (
 // (特别提醒,我们将一个日期时间转为儒略日时,其实使用的并不是真正的TT时间，而是我们常用的UTC或当地时区时间,故此无需考虑TT与UTC之间的转换)
 func JulianDay(year, month, day float64, timeParts ...float64) float64 {
 
-	var hour float64 = 0
-	var minute float64 = 0
-	var second float64 = 0
-	var millisecond float64 = 0
+	var hour, minute,second, millisecond float64 = 0, 0, 0, 0
 
 	for timeIndex, timePart := range timeParts {
 		switch timeIndex {
