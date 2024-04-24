@@ -14,8 +14,10 @@ func GregorianMonthDays(year, month int) int {
 }
 
 // IsLeapYear 给定的公历年year是否是闰年
+
+// 增加3200年的情况
 func IsLeapYear(year int) bool {
-	return year%4 == 0 && (year%100 != 0 || year%400 == 0)
+	return year%4 == 0 && (year%100 != 0 || year%400 == 0) && (year%3200 != 0 || year%172800 == 0)
 }
 
 // BeginningOfMonth 计算出t所在月份的首日
